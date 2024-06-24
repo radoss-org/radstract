@@ -1,0 +1,92 @@
+[tool.poetry]
+name = "radstract"
+version = "0.1.0"
+description = ""
+authors = ["Sharpz7 <adam.mcarthur62@gmail.com>"]
+readme = "README.md"
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+matplotlib = "^3.8.2"
+trimesh = "^4.0.5"
+nibabel = "^5.1.0"
+numpy = "^1.26.2"
+# https://github.com/pydicom/pydicom/pull/1908
+# Will be fixed in pydicom v3
+pillow = "<10.1.0"
+gradio = "^4.7.1"
+pydicom = "^2.4.3"
+timm = "^0.9.12"
+gdcm = "^1.1"
+simpleitk = "^2.3.1"
+sympy = "^1.12"
+licensecheck = "^2023.5.2"
+plotly = "^5.18.0"
+kaleido = "0.2.1"
+scikit-image = "^0.22.0"
+pytest = "^8.1.1"
+opencv-python = "^4.9.0.80"
+vulture = "^2.11"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+importlib-metadata = "^7.1.0"
+datasets = "^2.19.0"
+pdoc = "^14.4.0"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[tool.poetry.group.dev.dependencies]
+deptry = "^0.16.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+
+[tool.poe.tasks]
+# Under BSD: https://www.creatis.insa-lyon.fr/software/public/Gdcm/License.html
+license = "licensecheck --ignore-packages=gdcm"
+test = "pytest -vv --cov=radstract --durations=5 ./tests/unit"
+test_intergration = "pytest -vv --cov=radstract --durations=5 ./tests/intergration"
+test_all.shell = "mkdir -p debug && pytest -vv --cov=radstract --durations=5 ./tests ./examples/_test.py"
+deadcode = "vulture radstract ./scripts/whitelist.py"
+unusedimports = "deptry radstract"
+copiedcode = [
+  { cmd = "sudo npm install -g jscpd" },
+  { cmd = "jscpd radstract" },
+]
+linecount = [{ cmd = "sudo apt install cloc" }, { cmd = "cloc ./radstract" }]
+cuda = "python -c 'import torch; print(torch.cuda.is_available())'"
+pdoc_create = "pdoc -d numpy -o docs radstract"
+docs = [{ cmd = "poe pdoc_create" }]
+viewdocs = [{ cmd = "poe docs" }, { cmd = "npx http-server -o ./docs" }]
+examples.shell = "mkdir -p ./debug & pytest ./examples/_test.py"
+testgen = "poetry run python ./tests/_test_gen_data.py"
+help_real.shell = """
+    echo
+    echo Retuve Script Help
+    echo ==================
+    echo
+    echo "poe license" - Check the license of the project
+    echo "poe test" - Run the unit tests
+    echo "poe test_intergration" - Run the intergration tests
+    echo "poe test_all" - Run all the tests, including the examples
+    echo "poe deadcode" - Check for dead code
+    echo "poe unusedimports" - Check for unused imports
+    echo "poe copiedcode" - Check for copied code
+    echo "poe linecount" - Check the line count
+    echo "poe cuda" - Check if cuda is available
+    echo "poe pdoc_create" - Create the pdoc documentation
+    echo "poe docs" - Create and view the documentation
+    echo "poe viewdocs" - View the documentation
+    echo "poe examples.shell" - Run the examples
+    echo "poe testgen" - Generate test data
+    echo
+"""
+help = "poe -q help_real"

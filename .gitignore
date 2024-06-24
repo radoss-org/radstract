@@ -1,0 +1,18 @@
+# editor settings
+.idea
+.vscode
+_darcs
+
+# python
+.coverage
+__pycache__
+.pytest_cache
+
+# pdoc
+/docs
+
+# examples
+/debug
+
+# tests
+/tests/test_data
