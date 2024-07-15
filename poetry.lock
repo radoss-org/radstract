@@ -861,17 +861,6 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
-name = "gdcm"
-version = "1.1"
-description = ""
-optional = false
-python-versions = "*"
-files = [
-    {file = "gdcm-1.1-py3-none-manylinux1_x86_64.whl", hash = "sha256:dd2d3688560289c8333d53043926b0a179ad640aca9c14988ca1912e82270b49"},
-    {file = "gdcm-1.1-py3-none-win_amd64.whl", hash = "sha256:3322b45a3b056d91db32663a42949f9d6886da0d74dfde2f330bd0efa8072b89"},
-]
-
-[[package]]
 name = "gradio"
 version = "4.27.0"
 description = "Python library for easily interacting with trained machine learning models"
@@ -1331,43 +1320,6 @@ requests = ">=2.31.0,<3"
 requests-cache = ">=1.1.0,<2"
 rich = ">=13.5.2,<14"
 tomli = ">=2.0.1,<3"
-
-[[package]]
-name = "mako"
-version = "1.3.3"
-description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "Mako-1.3.3-py3-none-any.whl", hash = "sha256:5324b88089a8978bf76d1629774fcc2f1c07b82acdf00f4c5dd8ceadfffc4b40"},
-    {file = "Mako-1.3.3.tar.gz", hash = "sha256:e16c01d9ab9c11f7290eef1cfefc093fb5a45ee4a3da09e2fec2e4d1bae54e73"},
-]
-
-[package.dependencies]
-MarkupSafe = ">=0.9.2"
-
-[package.extras]
-babel = ["Babel"]
-lingua = ["lingua"]
-testing = ["pytest"]
-
-[[package]]
-name = "markdown"
-version = "3.6"
-description = "Python implementation of John Gruber's Markdown."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "Markdown-3.6-py3-none-any.whl", hash = "sha256:48f276f4d8cfb8ce6527c8f79e2ee29708508bf4d40aa410fbc3b4ee832c850f"},
-    {file = "Markdown-3.6.tar.gz", hash = "sha256:ed4f41f6daecbeeb96e576ce414c41d2d876daa9a16cb35fa8ed8c2ddfad0224"},
-]
-
-[package.dependencies]
-importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
-
-[package.extras]
-docs = ["mdx-gh-links (>=0.2)", "mkdocs (>=1.5)", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-nature (>=0.6)", "mkdocs-section-index", "mkdocstrings[python]"]
-testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markdown-it-py"
@@ -2066,19 +2018,23 @@ test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
 
 [[package]]
-name = "pdoc3"
-version = "0.10.0"
-description = "Auto-generate API documentation for Python projects."
+name = "pdoc"
+version = "14.5.1"
+description = "API Documentation for Python Projects"
 optional = false
-python-versions = ">= 3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "pdoc3-0.10.0-py3-none-any.whl", hash = "sha256:ba45d1ada1bd987427d2bf5cdec30b2631a3ff5fb01f6d0e77648a572ce6028b"},
-    {file = "pdoc3-0.10.0.tar.gz", hash = "sha256:5f22e7bcb969006738e1aa4219c75a32f34c2d62d46dc9d2fb2d3e0b0287e4b7"},
+    {file = "pdoc-14.5.1-py3-none-any.whl", hash = "sha256:fda6365a06e438b43ca72235b58a2e2ecd66445fcc444313f6ebbde4b0abd94b"},
+    {file = "pdoc-14.5.1.tar.gz", hash = "sha256:4ddd9c5123a79f511cedffd7231bf91a6e0bd0968610f768342ec5d00b5eefee"},
 ]
 
 [package.dependencies]
-mako = "*"
-markdown = ">=3.0"
+Jinja2 = ">=2.11.0"
+MarkupSafe = "*"
+pygments = ">=2.12.0"
+
+[package.extras]
+dev = ["hypothesis", "mypy", "pdoc-pyo3-sample-library (==1.0.11)", "pygments (>=2.14.0)", "pytest", "pytest-cov", "pytest-timeout", "ruff", "tox", "types-pygments"]
 
 [[package]]
 name = "pillow"
@@ -2485,6 +2441,57 @@ files = [
 
 [package.dependencies]
 six = ">=1.5"
+
+[[package]]
+name = "python-gdcm"
+version = "3.0.24.1"
+description = "Grassroots DICOM runtime libraries"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:556f8accad47a4fcaba0a2abfe96c5f91b1d37e66c1831b905ac179824a7fe2a"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2fd902d75a0cd2bffbfc1d87d56aa8070d99946254729ef7babb12cd5888a88e"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:45e42764a5230265b6a2d469c5ceb26d467b479adf476a281dbd7570e79648c4"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ac84ed171b5ea5172a3f55d871018b85f17519e08aa663c60cf865a1547db1af"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:554573d18dc52dd2bb65ba1bb5c0b5c2de33282d4287c301f6544b49c08941ed"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-win32.whl", hash = "sha256:ed81d7502b7a21375e8c4f317b16ee0691236aae11db30e3272bbdeedb22310a"},
+    {file = "python_gdcm-3.0.24.1-cp310-cp310-win_amd64.whl", hash = "sha256:7c2db75c60ac07d84b4f18a67db70c1075ae216bd7ff3cf0aac5dce31bc7a888"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:2707d7f3775b9de6fe4413d7968bf6ab9bad9257a319ee62b4af62488cd67190"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:d56989567bf9e72f1d74b971e0985eed99522e3fa5839a5ae2de86452f79aa7e"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0c23091cb541081dbda3d3ccf8baa1f5907b0854f81421d9504072b64842000f"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a76ad020da4efe6a5a65d918c010ae8ff48214d4e8881e27da967c11c6ff496"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d3a4c60cf8b6d5fb956c1bc84317081e76bfc1aa34d34e6a014b4a339f91d720"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-win32.whl", hash = "sha256:0ba71b67a342238bfd25f3a9795dbdbbfb6ca9a2c14bf16da1392fe69307fd8d"},
+    {file = "python_gdcm-3.0.24.1-cp311-cp311-win_amd64.whl", hash = "sha256:97258af17a3abc70867246ba509847f16479dc69704bdf3584ea1ca76313768f"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:a173c710dd4ddfc9f89b7c1651221883bc6ab1a322306abc3d408fae283ecb54"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:576ba8beb97b1264735d853d9b1678493578143d8a134ffb9d3175655b99e64e"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:407ab500704f711992568120dea356ce70628a6477f03b541064bbbd1f2d48cf"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:27236c708414ec5249b791e7855338cd327dff4573025c6ee16b13b2feb52c7a"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4e537b9c3c582e0a19cd89791634da5ff48f1d61eeee633bf6e806c7bed10aba"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-win32.whl", hash = "sha256:0fe3684df3be2abcf4ec6931e45f4caa8bd2aa60a84e65ddd612428f0fa39bcc"},
+    {file = "python_gdcm-3.0.24.1-cp312-cp312-win_amd64.whl", hash = "sha256:530e6b3f3904fd87c7e69ad0aee383f7a87213a8bf339314741ca64e3b6a3e94"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:de850cedc1dc58b8b5ee16c72cf67c5ee1021963a0bcbc0de58e162824afd6ff"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8eddf3dc5d7793f3af407972f5185ec5d7edc4989ccaeafbf0d3e5e74f5ba88e"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8b9f5075cbd39fd4448ef83a298e5dbf0886dea8805d1de90df7de56d7930839"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7fdfe2278d8c643087e6e8f9ff560cc2c613e230b14e3257c4f2d7e03efe6de3"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-win32.whl", hash = "sha256:a41209fbd4a64fcaa0fd22f6d953cb72146ecf3df461a947f2625f6ba6b9308b"},
+    {file = "python_gdcm-3.0.24.1-cp37-cp37m-win_amd64.whl", hash = "sha256:f0b47bce94eda86ae8f04fd3fd9040cd972e193c2539d40dca15832a2ea912e5"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:4c3419efc49bce0cd71f32d254b774c55b612e573785dc085452d4c21bc0bc78"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:dd236efc2c03a4141fb3adf5bf814cba211bbc2b717e259361a248098d6cca8c"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:96ee58139bd3118418d3ff0eb24e00a0f8d3968f173083ab59d9a462101be3c0"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fa60e64ae4de01f541ee624ea3777b6053821716de5fa999112c79cb13fdc257"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:05c794c064f2fdebe2b219659af0a52e26a7c85812d91653e9be2a4dacc00176"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-win32.whl", hash = "sha256:6bfc8a7af28d96388738cf9983309190153a3c8a6848fce46f8e7fb55bdcfcc0"},
+    {file = "python_gdcm-3.0.24.1-cp38-cp38-win_amd64.whl", hash = "sha256:40b1fc6a7e669df51bf1809e209f2c3d5e752b6575c60b67bac630a8fba528e9"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:0557391917073925b0289e4f739558aaf7134e1171a920462758b24fdd71c303"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:8af1b2fb0208081ea51c5e26e6ca1aab4a90b00698f239158470b1928b38d62a"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:83ab854d4c0b031805405b9abe7512725f23e1b768f938c9c4e91d33124da742"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3f099c3b8a59d35e8d2e05bf9b5a8c10b118b8e5cf122c5ebd0f6aecce8667e0"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d78e9fe406cd6ac1d697a76321def22e61043b78a633696549ea39b16ac643e3"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-win32.whl", hash = "sha256:361e3667dbba8d8d0d8f552cb699197524459bdc02ee062db8fe286ac16c7dda"},
+    {file = "python_gdcm-3.0.24.1-cp39-cp39-win_amd64.whl", hash = "sha256:988daae3828d35dc0ceaba8fb0c337b893991480dfff4c6dbdc6818b3d1b7db4"},
+    {file = "python_gdcm-3.0.24.1.tar.gz", hash = "sha256:101a59c5c2dc34f1eb8e72ccf088a62f45101bf2f844a9e4f6b1711b1268892d"},
+]
 
 [[package]]
 name = "python-multipart"
@@ -3779,4 +3786,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "d3133dd5bb83eead75f36b07a89527a7ab80ece027d130b38ce154fc0fdd9723"
+content-hash = "2557b572478ecd9e2bef5b56ce131cbd391ac53eef04903c18708e3bf33234cf"
