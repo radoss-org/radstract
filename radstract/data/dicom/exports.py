@@ -56,7 +56,9 @@ def _set_defaults(dicom: pydicom.Dataset) -> pydicom.Dataset:
 
     dicom.file_meta = FileMetaDataset()
 
-    dicom.file_meta.MediaStorageSOPClassUID = pydicom.uid.generate_uid()
+    dicom.file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
+    dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
+
     dicom.file_meta.MediaStorageSOPInstanceUID = PlaceHolderTag.UseOldTagUID
     dicom.file_meta.ImplementationClassUID = pydicom.uid.generate_uid()
 
@@ -241,7 +243,10 @@ def convert_images_to_dicom(
             dicom_type=DicomTypes.SERIES_ANONYMIZED
         )
 
-    new_dicom = add_tags(empty_dicom, old_dicom)
+    if old_dicom is not None:
+        new_dicom = add_tags(empty_dicom, old_dicom)
+    else:
+        new_dicom = empty_dicom
 
     new_dicom.PixelData = multi_frame_array.tobytes()
 
