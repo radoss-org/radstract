@@ -52,14 +52,27 @@ def convert_dicom_img_to_rgb(
             image = Image.fromarray(image, mode="YCbCr")
             rgb = image.convert("RGB")
 
-    elif photometric_interpretation == PhotometricInterpretation.YBR_FULL_422:
+    elif photometric_interpretation in [
+        PhotometricInterpretation.YBR_FULL_422,
+        PhotometricInterpretation.YBR_FULL,
+    ]:
         image = Image.fromarray(image, mode="YCbCr")
         rgb = image.convert("RGB")
 
+    # All PhotometricInterpretations that we know can be converted automatically
+    elif photometric_interpretation in [PhotometricInterpretation.MONOCHROME2]:
+        image = Image.fromarray(image)
+        rgb = image.convert("RGB")
+
     else:
-        raise NotImplementedError(
-            f"PhotometricInterpretation {photometric_interpretation} not supported"
+        # warn that the image is not in garanteed supported format, and
+        # the default conversion will be used
+        warnings.warn(
+            f"Image is in {photometric_interpretation}. "
+            "Attempting default conversion to RGB..."
         )
+        image = Image.fromarray(image)
+        rgb = image.convert("RGB")
 
     return rgb
 
@@ -68,7 +81,7 @@ def convert_dicom_to_images(
     old_dicom: pydicom.Dataset,
     crop_coordinates: Tuple[int, int, int, int] = None,
     compress_factor: int = 1,
-    dicom_type: DicomTypes = DicomTypes.DEFAULT,
+    dicom_type: str = DicomTypes.DEFAULT,
     noise_filters: List[NoiseReductionFilter] = NoiseReductionFilter.DEFAULT,
 ) -> Image.Image:
     """
