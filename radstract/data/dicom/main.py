@@ -21,6 +21,7 @@ from radstract.data.images import (
 
 class PhotometricInterpretation:
     YBR_FULL_422 = "YBR_FULL_422"
+    YBR_FULL = "YBR_FULL"
     RGB = "RGB"
 
 
