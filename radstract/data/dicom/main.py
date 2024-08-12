@@ -21,7 +21,9 @@ from radstract.data.images import (
 
 class PhotometricInterpretation:
     YBR_FULL_422 = "YBR_FULL_422"
+    YBR_FULL = "YBR_FULL"
     RGB = "RGB"
+    MONOCHROME2 = "MONOCHROME2"
 
 
 def convert_dicom_img_to_rgb(
