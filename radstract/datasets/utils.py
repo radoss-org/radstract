@@ -2,7 +2,7 @@ import logging
 import os
 from collections import defaultdict
 from multiprocessing import Pool
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pydicom
@@ -12,6 +12,23 @@ from radstract.data.colors import change_color
 from radstract.data.dicom import DicomTypes, convert_dicom_to_images
 from radstract.data.multimodal import remove_black_frames
 from radstract.data.nifti import convert_nifti_to_image_labels
+
+
+class DataSplit:
+    def __init__(self, pc_train=None, pc_val=None, pc_test=None):
+        if not (pc_train and pc_val and pc_test):
+            pc_train = 0.7
+            pc_val = 0.2
+            pc_test = 0.1
+
+        if pc_train * 10 + pc_val * 10 + pc_test * 10 != 10:
+            raise ValueError(
+                "The sum of the percentages must be equal to 1."
+                f"The current sum is: {(pc_train*10 + pc_val*10 + pc_test*10)/10}"
+            )
+        self.pc_train = pc_train
+        self.pc_val = pc_val
+        self.pc_test = pc_test
 
 
 def _process_dicom_nifti_pair(
@@ -90,7 +107,7 @@ def _process_file_pair(
     dicom_type: DicomTypes,
     pair_key: str,
     pair: Dict[str, str],
-    data_split: Tuple[float, float],
+    data_split: Union[Tuple[float, float], DataSplit],
     color_changes: List[Tuple[int, int, int]],
     file_pair_kwargs: Optional[Dict],
     save_func=save_image_label_pair,
@@ -106,7 +123,7 @@ def _process_file_pair(
     :param dicom_type: DicomTypes: Type of DICOM file.
     :param pair_key: str: Key for the file pair.
     :param pair: dict: Dictionary containing the file pair.
-    :param data_split: tuple: Data split percentages.
+    :param data_split: tuple, DataSplit: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param file_pair_kwargs: dict: Keyword arguments for the file pair.
     :param save_func: function: Function to save the image and label pair.
@@ -114,7 +131,7 @@ def _process_file_pair(
 
     :return: None
     """
-    image_dir, label_dir = decide_data_split(output_dir, *data_split)
+    image_dir, label_dir = decide_data_split(output_dir, data_split)
 
     if pair["dcm"] and pair["nii"]:
         dcm_path = os.path.join(input_dir, pair["dcm"])
@@ -220,28 +237,44 @@ def convert_dcm_nii_dataset(
 
 
 def decide_data_split(
-    dataset_dir: str, percent_train: float = 0.3, percent_val: float = 0.4
+    dataset_dir: str,
+    data_split: Union[Tuple[float, float], DataSplit] = DataSplit(),
 ):
     """
     function to decide the split of the data
 
     :param dataset_dir: str: path to the dataset directory
-    :param percent_train: float: percentage of data to be used for training
-    :param percent_val: float: percentage of data to be used for validation
 
     :return: tuple: image_dir, label_dir
     """
 
+    # if the data_split is a tuple, convert it to a DataSplit object
+    if isinstance(data_split, tuple):
+        pc_train, pc_val = data_split
+        pc_test = 1 - pc_train - pc_val
+    else:
+        pc_train = data_split.pc_train
+        pc_val = data_split.pc_val
+        pc_test = data_split.pc_test
+
+    # verify that the percentages add up to 1
+    if pc_train * 10 + pc_val * 10 + pc_test * 10 != 10:
+        raise ValueError(
+            "The sum of the percentages must be equal to 1."
+            f"The current sum is: {(pc_train*10 + pc_val*10 + pc_test*10)/10}"
+        )
+
     random = np.random.rand()
 
-    if random < percent_train:
-        image_dir = os.path.join(dataset_dir, "images/train")
-        label_dir = os.path.join(dataset_dir, "labels/train")
-    elif random < percent_val:
-        image_dir = os.path.join(dataset_dir, "images/val")
-        label_dir = os.path.join(dataset_dir, "labels/val")
+    # re-arrange images and train directories
+    if random < pc_train:
+        image_dir = os.path.join(dataset_dir, "images", "train")
+        label_dir = os.path.join(dataset_dir, "labels", "train")
+    elif random < pc_train + pc_val:
+        image_dir = os.path.join(dataset_dir, "images", "val")
+        label_dir = os.path.join(dataset_dir, "labels", "val")
     else:
-        image_dir = os.path.join(dataset_dir, "images/test")
-        label_dir = os.path.join(dataset_dir, "labels/test")
+        image_dir = os.path.join(dataset_dir, "images", "test")
+        label_dir = os.path.join(dataset_dir, "labels", "test")
 
     return image_dir, label_dir

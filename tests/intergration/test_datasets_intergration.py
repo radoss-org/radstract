@@ -13,6 +13,7 @@ from radstract.datasets.nnunet import (
     generate_nnunet_dataset_json,
 )
 from radstract.datasets.polygon import convert_dataset_to_polygons
+from radstract.datasets.utils import DataSplit
 
 POST_DATASET_DIR = "./tests/test_data/post_created_datasets"
 
@@ -24,6 +25,12 @@ TEST_DIR_POLYGON = f"{POST_DATASET_DIR}/polygon"
 def test_polygon_dataset(dataset_dir):
     # create temp dir
     with tempfile.TemporaryDirectory() as temp_dir:
+        # make a dir within the temp dir
+        testdir1 = f"{temp_dir}/test1"
+        os.makedirs(testdir1, exist_ok=True)
+        testdir2 = f"{temp_dir}/test2"
+        os.makedirs(testdir2, exist_ok=True)
+
         convert_dataset_to_polygons(
             input_dir=dataset_dir,
             output_dir=temp_dir,
@@ -51,6 +58,37 @@ def test_polygon_dataset(dataset_dir):
             test_dir_file = f.read()
 
         assert temp_dir_file == test_dir_file
+
+        # train with a different datasplit
+        convert_dataset_to_polygons(
+            input_dir=dataset_dir,
+            output_dir=temp_dir,
+            processes=8,
+            crop_coordinates=None,
+            dicom_type=DicomTypes.SERIES,
+            data_split=DataSplit(pc_train=1),
+            color_changes=None,
+            min_polygons=6,
+        )
+
+        temp_dir_files2 = os.listdir(f"{temp_dir}/labels/train")
+        test_dir_files2 = os.listdir(f"{TEST_DIR_POLYGON}/labels/train")
+        temp_dir_files2.sort()
+        test_dir_files2.sort()
+
+        assert temp_dir_files2 == test_dir_files2
+
+        with open(f"{temp_dir}/labels/train/{temp_dir_files[0]}", "r") as f:
+            temp_dir_file2 = f.read()
+
+        with open(
+            f"{TEST_DIR_POLYGON}/labels/train/{test_dir_files[0]}", "r"
+        ) as f:
+            test_dir_file2 = f.read()
+
+        assert (
+            temp_dir_file2 == test_dir_file2 == temp_dir_file == test_dir_file
+        )
 
 
 def test_huggingface_dataset(dataset_dir):

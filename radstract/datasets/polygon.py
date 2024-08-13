@@ -1,12 +1,13 @@
 import os
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
+from h11 import Data
 from PIL import Image
 
 from radstract.data.dicom import DicomTypes
 
 from .polygon_utils import get_polygon_annotations, segmentation_to_polygons
-from .utils import convert_dcm_nii_dataset
+from .utils import DataSplit, convert_dcm_nii_dataset
 
 
 def convert_dataset_to_polygons(
@@ -15,7 +16,7 @@ def convert_dataset_to_polygons(
     processes: int = 1,
     crop_coordinates: Tuple[int, int, int, int] = None,
     dicom_type: DicomTypes = DicomTypes.DEFAULT,
-    data_split: Tuple[float, float] = (0.3, 0.4),
+    data_split: Union[Tuple[float, float], DataSplit] = DataSplit(),
     color_changes: List[Tuple[int, int, int]] = None,
     min_polygons: int = 6,
 ) -> None:
@@ -28,7 +29,7 @@ def convert_dataset_to_polygons(
     :param processes: int: Number of processes to use.
     :param crop_coordinates: tuple: Crop coordinates for the images.
     :param dicom_type: DicomTypes: Type of DICOM file.
-    :param data_split: tuple: Data split percentages.
+    :param data_split: tuple, DataSplit: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param min_polygons: int: Minimum number of polygons to consider.
 

@@ -1,11 +1,10 @@
 import os
 import random
-from typing import List, Tuple
-
-from PIL import Image
+from typing import List, Tuple, Union
 
 from datasets import Dataset, DatasetDict
 from datasets import Image as HuggingfaceImage
+
 from radstract.data.dicom import DicomTypes
 
 from .utils import convert_dcm_nii_dataset, save_image_label_pair
