@@ -4,7 +4,7 @@ NN-UNet utility functions
 
 import os
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import SimpleITK as sitk
@@ -12,21 +12,27 @@ import SimpleITK as sitk
 from radstract.data.dicom import DicomTypes
 from radstract.data.nifti import NIFTI, convert_images_to_nifti_labels
 
-from .utils import convert_dcm_nii_dataset
+from .utils import DataSplit, convert_dcm_nii_dataset
 
 
 def nnunet_decide_split(
     output_dir: str,
-    data_split: Tuple[float, float],
+    data_split: Union[Tuple[float, float], DataSplit],
 ) -> Tuple[str, str]:
     """
     Decide the split for the nnU-Net dataset.
 
     :param output_dir: str: Path to the output directory.
-    :param data_split: tuple: Data split percentages.
+    :param data_split: tuple, DataSplit: Data split percentages.
 
     :return: Tuple containing the image NIFTI and label NIFTI directories.
     """
+
+    if isinstance(data_split, DataSplit):
+        if data_split.pc_val != 0:
+            raise ValueError("DataSplit object must have pc_val = 0")
+
+        data_split = (data_split.pc_train, data_split.pc_test)
 
     if random.random() < data_split[0]:
         nii_dir = os.path.join(output_dir, "imagesTr")
