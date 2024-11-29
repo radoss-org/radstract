@@ -25,6 +25,7 @@ from radstract.datasets.nnunet import (
     generate_nnunet_dataset_json,
 )
 from radstract.datasets.polygon import convert_dataset_to_polygons
+from radstract.datasets.utils import DataSplit
 from radstract.testdata import Cases, download_case
 
 dcm_file, *_ = download_case(Cases.ULTRASOUND_DICOM_DATASET)
@@ -42,7 +43,7 @@ convert_dataset_to_polygons(
     processes=8,
     crop_coordinates=None,
     dicom_type=DicomTypes.SERIES,
-    data_split=(1, 0),
+    data_split=DataSplit(0.5, 0.5, 0),
     color_changes=None,
     min_polygons=6,
 )
@@ -53,7 +54,7 @@ convert_dataset_to_huggingface(
     processes=8,
     crop_coordinates=None,
     dicom_type=DicomTypes.SERIES,
-    data_split=(1, 0),
+    data_split=DataSplit(0.5, 0.5, 0),
     color_changes=None,
 )
 
@@ -63,7 +64,7 @@ convert_dataset_to_nnunet(
     processes=8,
     crop_coordinates=None,
     dicom_type=DicomTypes.SERIES,
-    data_split=(1, 0),
+    data_split=DataSplit(0.5, 0, 0.5),
     color_changes=None,
 )
 

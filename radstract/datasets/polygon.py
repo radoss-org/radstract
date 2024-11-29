@@ -1,7 +1,6 @@
 import os
 from typing import List, Optional, Tuple, Union
 
-from h11 import Data
 from PIL import Image
 
 from radstract.data.dicom import DicomTypes
@@ -19,6 +18,7 @@ def convert_dataset_to_polygons(
     data_split: Union[Tuple[float, float], DataSplit] = DataSplit(),
     color_changes: List[Tuple[int, int, int]] = None,
     min_polygons: int = 6,
+    datasplit_seed=42,
 ) -> None:
     """
     Convert a dataset in the input_dir to a .txt polygon format
@@ -32,6 +32,7 @@ def convert_dataset_to_polygons(
     :param data_split: tuple, DataSplit: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param min_polygons: int: Minimum number of polygons to consider.
+    :param datasplit_seed: int: Seed for the data split.
 
     :return: None
     """
@@ -56,6 +57,7 @@ def convert_dataset_to_polygons(
         color_changes=color_changes,
         file_pair_kwargs={"min_polygons": min_polygons},
         save_func=save_polygons,
+        datasplit_seed=datasplit_seed,
     )
 
 

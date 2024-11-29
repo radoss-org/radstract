@@ -18,6 +18,7 @@ def convert_dataset_to_huggingface(
     dicom_type: DicomTypes = DicomTypes.DEFAULT,
     data_split: Tuple[float, float] = (0.3, 0.4),
     color_changes: List[Tuple[int, int, int]] = None,
+    datasplit_seed=42,
 ) -> None:
     """
     Convert a dataset in the input_dir to a Huggingface DatasetDict and save it to the output_dir.
@@ -30,6 +31,7 @@ def convert_dataset_to_huggingface(
     :param data_split: tuple: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param min_polygons: int: Minimum number of polygons to consider.
+    :param datasplit_seed: int: Seed for the data split.
 
     :return: None
     """
@@ -54,6 +56,7 @@ def convert_dataset_to_huggingface(
         color_changes=color_changes,
         file_pair_kwargs=None,
         save_func=save_image_label_pair,
+        datasplit_seed=datasplit_seed,
     )
 
 

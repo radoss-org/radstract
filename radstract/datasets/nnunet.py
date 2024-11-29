@@ -16,30 +16,35 @@ from .utils import DataSplit, convert_dcm_nii_dataset
 
 
 def nnunet_decide_split(
-    output_dir: str,
-    data_split: Union[Tuple[float, float], DataSplit],
+    root_output_dir: str,
+    image_dir: str,
+    label_dir: str,
 ) -> Tuple[str, str]:
     """
     Decide the split for the nnU-Net dataset.
 
-    :param output_dir: str: Path to the output directory.
-    :param data_split: tuple, DataSplit: Data split percentages.
+    :param root_output_dir: str: Root output directory.
+    :param image_dir: str: Image directory.
+    :param label_dir: str: Label directory.
 
     :return: Tuple containing the image NIFTI and label NIFTI directories.
     """
 
-    if isinstance(data_split, DataSplit):
-        if data_split.pc_val != 0:
-            raise ValueError("DataSplit object must have pc_val = 0")
+    # get the last part of the image_dir
+    split_dir = image_dir.split("/")[-1]
 
-        data_split = (data_split.pc_train, data_split.pc_test)
+    if split_dir == "val":
+        raise ValueError("nnUNet does not have validation data")
 
-    if random.random() < data_split[0]:
-        nii_dir = os.path.join(output_dir, "imagesTr")
-        nii_label_dir = os.path.join(output_dir, "labelsTr")
-    else:
-        nii_dir = os.path.join(output_dir, "imagesTs")
-        nii_label_dir = os.path.join(output_dir, "labelsTr")
+    mapping = {
+        "train": "imagesTr",
+        "test": "imagesTs",
+    }
+
+    split_dir = mapping[split_dir]
+
+    nii_dir = os.path.join(root_output_dir, split_dir)
+    nii_label_dir = os.path.join(root_output_dir, "labelsTr")
 
     return nii_dir, nii_label_dir
 
@@ -48,7 +53,7 @@ def save_nunnet(
     images: List[str],
     image_labels: List[str],
     image_dir: str,
-    _: str,
+    label_dir: str,
     file_name: str,
     file_pair_kwargs: Optional[dict] = None,
 ) -> None:
@@ -56,7 +61,7 @@ def save_nunnet(
     root_output_dir = image_dir.split("images/")[0]
 
     nii_dir, nii_label_dir = nnunet_decide_split(
-        root_output_dir, file_pair_kwargs["data_split"]
+        root_output_dir, image_dir, label_dir
     )
 
     nifti_image = NIFTI(sitk.GetImageFromArray(np.array(images)))
@@ -74,6 +79,7 @@ def convert_dataset_to_nnunet(
     dicom_type: DicomTypes = DicomTypes.DEFAULT,
     data_split: Tuple[float, float] = (0.3, 0.4),
     color_changes: List[Tuple[int, int, int]] = None,
+    datasplit_seed=42,
 ) -> None:
     """
     Convert a dataset in the input_dir to a Huggingface DatasetDict and save it to the output_dir.
@@ -86,6 +92,7 @@ def convert_dataset_to_nnunet(
     :param data_split: tuple: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param min_polygons: int: Minimum number of polygons to consider.
+    :param datasplit_seed: int: Seed for the data split.
 
     :return: None
     """
@@ -104,9 +111,10 @@ def convert_dataset_to_nnunet(
         dicom_type=dicom_type,
         data_split=data_split,
         color_changes=color_changes,
-        file_pair_kwargs={"data_split": data_split},
+        file_pair_kwargs={},
         save_func=save_nunnet,
         single_image_process=False,
+        datasplit_seed=datasplit_seed,
     )
 
 

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 import cv2
 import numpy as np
@@ -26,11 +27,14 @@ from radstract.datasets.nnunet import (
     generate_nnunet_dataset_json,
 )
 from radstract.datasets.polygon import convert_dataset_to_polygons
+from radstract.datasets.utils import DataSplit
 from radstract.testdata import Cases, download_case
 
 # create test_data dir
-if not os.path.exists("./tests/test_data/"):
-    os.makedirs("./tests/test_data/")
+if os.path.exists("./tests/test_data/"):
+    # remove existing test_data
+    shutil.rmtree("./tests/test_data/")
+os.makedirs("./tests/test_data/")
 
 dcm_file, *_ = download_case(
     Cases.ULTRASOUND_DICOM_DATASET, directory="./tests/test_data/dataset"
@@ -55,7 +59,7 @@ def create_datasets():
         processes=8,
         crop_coordinates=None,
         dicom_type=DicomTypes.SERIES,
-        data_split=(1, 0),
+        data_split=DataSplit(0.5, 0.5, 0),
         color_changes=None,
         min_polygons=6,
     )
@@ -66,7 +70,7 @@ def create_datasets():
         processes=8,
         crop_coordinates=None,
         dicom_type=DicomTypes.SERIES,
-        data_split=(1, 0),
+        data_split=DataSplit(0.5, 0.5, 0),
         color_changes=None,
     )
 
@@ -76,7 +80,7 @@ def create_datasets():
         processes=8,
         crop_coordinates=None,
         dicom_type=DicomTypes.SERIES,
-        data_split=(1, 0),
+        data_split=DataSplit(0.5, 0, 0.5),
         color_changes=None,
     )
 

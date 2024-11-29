@@ -3,6 +3,7 @@ Provides a convenient way to download test data for the Retuve library.
 """
 
 import os
+import uuid
 from enum import Enum
 
 import requests
@@ -53,13 +54,17 @@ class Cases(Enum):
     ]
 
 
-def download_case(case: Cases, directory: str = None, temp=True) -> list:
+def download_case(
+    case: Cases, directory: str = None, temp=True, silent=True
+) -> list:
     """
     Download the test data for the given case
 
     :param case: The Case
     :param directory: The directory to download the files to
     :param temp: Whether to download the files to a temporary directory
+    :param silent: Whether to print the download status
+
     :return: The filenames of the downloaded files
 
     Note that when directory is provided, temp is ignored.
@@ -68,8 +73,8 @@ def download_case(case: Cases, directory: str = None, temp=True) -> list:
         temp = False
 
     if temp:
-        # the directory should be in /tmp
-        directory = "/tmp/radstract-testdata"
+        # the directory should be in /tmp with a short uuid
+        directory = f"/tmp/radstract-testdata/{uuid.uuid4()}"
 
     # Ensure the directory exists
     if not os.path.exists(directory):
@@ -93,7 +98,8 @@ def download_case(case: Cases, directory: str = None, temp=True) -> list:
         if response.status_code == 200:
             with open(filename, "wb") as file:
                 file.write(response.content)
-            print(f"Downloaded {filename}")
+            if not silent:
+                print(f"Downloaded {filename}")
         else:
             print(
                 f"Failed to download {url}, status code: {response.status_code}"
