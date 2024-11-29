@@ -64,7 +64,7 @@ convert_dataset_to_nnunet(
     processes=8,
     crop_coordinates=None,
     dicom_type=DicomTypes.SERIES,
-    data_split=DataSplit(0.5, 0, 0.5),
+    data_split=DataSplit(0.5, 0.5, 0),
     color_changes=None,
 )
 
