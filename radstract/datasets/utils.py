@@ -182,6 +182,7 @@ def convert_dcm_nii_dataset(
     file_pair_kwargs: Optional[Dict] = None,
     save_func=save_image_label_pair,
     single_image_process: bool = True,
+    datasplit_seed=42,
 ):
     """
     Convert a dataset of DICOM and NIfTI files with consistent data splitting.
@@ -196,6 +197,7 @@ def convert_dcm_nii_dataset(
     :param file_pair_kwargs: dict: Keyword arguments for the file pair.
     :param save_func: function: Function to save the image and label pair.
     :param single_image_process: bool: Process a single image.
+    :param datasplit_seed: int: Seed for the data split.
 
     :return: None
     """
@@ -212,6 +214,10 @@ def convert_dcm_nii_dataset(
     pairs_to_process = [
         (pair_key, pair) for pair_key, pair in file_pairs.items()
     ]
+
+    # shuffle the pairs based on the seed
+    rng = np.random.default_rng(datasplit_seed)
+    rng.shuffle(pairs_to_process)
 
     # Pre-determine data splits
     total_files = len(pairs_to_process)
