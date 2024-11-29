@@ -18,8 +18,6 @@ from radstract.data.models import create_model_from_nifti
 
 from .models.common import ShapeDistroModels, generate_distribution
 
-DPI = 300
-
 
 def rolling_average(a: np.ndarray, window_size: int) -> np.ndarray:
     """

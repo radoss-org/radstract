@@ -1,28 +1,76 @@
 import os
 import subprocess
 
+import pytest
+
 BLACKLIST = []
 
 
-def test_example_scripts():
+# Dynamically collect scripts for testing
+def collect_scripts():
     examples_dir = os.path.dirname(__file__)
     module_dir = os.path.abspath(
         os.path.join(examples_dir, "..")
     )  # Assuming your module is one level up from the examples directory
 
-    # walk through all the examples
+    scripts = []
     for root, _, files in os.walk(examples_dir):
         for file in files:
             if file.endswith(".py") and file not in BLACKLIST:
-                # run the script
-                script_path = os.path.join(root, file)
-                try:
-                    env = os.environ.copy()
-                    env["PYTHONPATH"] = module_dir
-                    subprocess.run(
-                        ["python", script_path], check=True, env=env
-                    )
-                except subprocess.CalledProcessError as e:
-                    print(f"Error running script: {script_path}")
-                    print(f"Error message: {e}")
-                    assert False
+                scripts.append((os.path.join(root, file), module_dir))
+    return scripts
+
+
+# Dynamically create test functions for pytest
+scripts = collect_scripts()
+for i, (script_path, module_dir) in enumerate(scripts):
+    # test_name should be derived from the script name
+    test_name = f'test_{script_path.split("/")[-1].replace(".py", "").replace("_", "")}'
+
+    # divide i to fit into 4 groups
+    group_no = i % 4 + 1
+
+    def create_test(script_path, module_dir, temp_dir):
+        @pytest.mark.xdist_group(name=f"group{group_no}")
+        def test():
+            try:
+                # Capture the initial state of the directory
+                initial_files = set(os.listdir(temp_dir))
+
+                # Set up the environment
+                env = os.environ.copy()
+                env["PYTHONPATH"] = module_dir
+
+                # Run the script
+                subprocess.run(["python", script_path], check=True, env=env)
+
+                # Capture the state of the directory after the script runs
+                final_files = set(os.listdir(temp_dir))
+
+                # Identify new files created during script execution
+                new_files = final_files - initial_files
+
+                # Filter only files with the specified extensions
+                target_extensions = {".html", ".mp4", ".jpg", ".png"}
+                files_to_remove = [
+                    file_name
+                    for file_name in new_files
+                    if os.path.splitext(file_name)[1].lower()
+                    in target_extensions
+                ]
+
+                # Delete the filtered files
+                for file_name in files_to_remove:
+                    file_path = os.path.join(temp_dir, file_name)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+
+            except subprocess.CalledProcessError as e:
+                pytest.fail(
+                    f"Script failed: {script_path}\nError message: {e}"
+                )
+
+        return test
+
+    # Add the test function to the global scope
+    globals()[test_name] = create_test(script_path, module_dir, "./")

@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import defaultdict
-from multiprocessing import Pool
+from multiprocessing import Lock, Manager, Pool
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -16,7 +16,7 @@ from radstract.data.nifti import convert_nifti_to_image_labels
 
 class DataSplit:
     def __init__(self, pc_train=None, pc_val=None, pc_test=None):
-        if not (pc_train and pc_val and pc_test):
+        if pc_train is None and pc_val is None and pc_test is None:
             pc_train = 0.7
             pc_val = 0.2
             pc_test = 0.1
@@ -100,14 +100,14 @@ def save_image_label_pair(
     label.save(os.path.join(label_dir, f"{file_name}.png"))
 
 
-def _process_file_pair(
+def _process_file_pair_with_split(
     input_dir: str,
     output_dir: str,
     crop_coordinates: Tuple[int, int, int, int],
     dicom_type: DicomTypes,
     pair_key: str,
     pair: Dict[str, str],
-    data_split: Union[Tuple[float, float], DataSplit],
+    split: str,
     color_changes: List[Tuple[int, int, int]],
     file_pair_kwargs: Optional[Dict],
     save_func=save_image_label_pair,
@@ -115,7 +115,7 @@ def _process_file_pair(
 ):
     """
     @private
-    Process a single file pair.
+    Process a single file pair for a specific data split.
 
     :param input_dir: str: Path to the input directory.
     :param output_dir: str: Path to the output directory.
@@ -123,7 +123,7 @@ def _process_file_pair(
     :param dicom_type: DicomTypes: Type of DICOM file.
     :param pair_key: str: Key for the file pair.
     :param pair: dict: Dictionary containing the file pair.
-    :param data_split: tuple, DataSplit: Data split percentages.
+    :param split: str: Data split (train, val, or test).
     :param color_changes: list: List of colour changes.
     :param file_pair_kwargs: dict: Keyword arguments for the file pair.
     :param save_func: function: Function to save the image and label pair.
@@ -131,7 +131,8 @@ def _process_file_pair(
 
     :return: None
     """
-    image_dir, label_dir = decide_data_split(output_dir, data_split)
+    image_dir = os.path.join(output_dir, "images", split)
+    label_dir = os.path.join(output_dir, "labels", split)
 
     if pair["dcm"] and pair["nii"]:
         dcm_path = os.path.join(input_dir, pair["dcm"])
@@ -154,7 +155,6 @@ def _process_file_pair(
                     file_name,
                     file_pair_kwargs,
                 )
-
         else:
             file_name = pair_key
             save_func(
@@ -184,7 +184,7 @@ def convert_dcm_nii_dataset(
     single_image_process: bool = True,
 ):
     """
-    Convert a dataset of DICOM and NIfTI files.
+    Convert a dataset of DICOM and NIfTI files with consistent data splitting.
 
     :param input_dir: str: Path to the input directory.
     :param output_dir: str: Path to the output directory.
@@ -194,15 +194,14 @@ def convert_dcm_nii_dataset(
     :param data_split: tuple: Data split percentages.
     :param color_changes: list: List of colour changes.
     :param file_pair_kwargs: dict: Keyword arguments for the file pair.
-    :param save_func: function: Function to save the image and label pair.\
+    :param save_func: function: Function to save the image and label pair.
     :param single_image_process: bool: Process a single image.
 
     :return: None
     """
-
     file_pairs = defaultdict(lambda: {"dcm": None, "nii": None})
 
-    for file in os.listdir(input_dir):
+    for file in sorted(os.listdir(input_dir)):
         if file.endswith(".dcm") or file.endswith(".nii.gz"):
             key = file.split(".")[0]
             if file.endswith(".dcm"):
@@ -214,40 +213,8 @@ def convert_dcm_nii_dataset(
         (pair_key, pair) for pair_key, pair in file_pairs.items()
     ]
 
-    with Pool(processes=processes) as pool:
-        pool.starmap(
-            _process_file_pair,
-            [
-                (
-                    input_dir,
-                    output_dir,
-                    crop_coordinates,
-                    dicom_type,
-                    pair_key,
-                    pair,
-                    data_split,
-                    color_changes,
-                    file_pair_kwargs,
-                    save_func,
-                    single_image_process,
-                )
-                for pair_key, pair in pairs_to_process
-            ],
-        )
-
-
-def decide_data_split(
-    dataset_dir: str,
-    data_split: Union[Tuple[float, float], DataSplit] = DataSplit(),
-):
-    """
-    function to decide the split of the data
-
-    :param dataset_dir: str: path to the dataset directory
-
-    :return: tuple: image_dir, label_dir
-    """
-
+    # Pre-determine data splits
+    total_files = len(pairs_to_process)
     # if the data_split is a tuple, convert it to a DataSplit object
     if isinstance(data_split, tuple):
         pc_train, pc_val = data_split
@@ -264,17 +231,45 @@ def decide_data_split(
             f"The current sum is: {(pc_train*10 + pc_val*10 + pc_test*10)/10}"
         )
 
-    random = np.random.rand()
+    train_count = int(pc_train * total_files)
+    val_count = int(pc_val * total_files)
 
-    # re-arrange images and train directories
-    if random < pc_train:
-        image_dir = os.path.join(dataset_dir, "images", "train")
-        label_dir = os.path.join(dataset_dir, "labels", "train")
-    elif random < pc_train + pc_val:
-        image_dir = os.path.join(dataset_dir, "images", "val")
-        label_dir = os.path.join(dataset_dir, "labels", "val")
-    else:
-        image_dir = os.path.join(dataset_dir, "images", "test")
-        label_dir = os.path.join(dataset_dir, "labels", "test")
+    train_pairs = pairs_to_process[:train_count]
+    val_pairs = pairs_to_process[train_count : train_count + val_count]
+    test_pairs = pairs_to_process[train_count + val_count :]
 
-    return image_dir, label_dir
+    # if pc_test is 0, but there are still test pairs, add them to the training set
+    if pc_test == 0 and test_pairs:
+        train_pairs.extend(test_pairs)
+        test_pairs = []
+
+    # Assign directories to the splits
+    split_mapping = []
+    for pair in train_pairs:
+        split_mapping.append(("train", pair))
+    for pair in val_pairs:
+        split_mapping.append(("val", pair))
+    for pair in test_pairs:
+        split_mapping.append(("test", pair))
+
+    # Use multiprocessing to process file pairs
+    with Pool(processes=processes) as pool:
+        pool.starmap(
+            _process_file_pair_with_split,
+            [
+                (
+                    input_dir,
+                    output_dir,
+                    crop_coordinates,
+                    dicom_type,
+                    pair_key,
+                    pair,
+                    split,
+                    color_changes,
+                    file_pair_kwargs,
+                    save_func,
+                    single_image_process,
+                )
+                for split, (pair_key, pair) in split_mapping
+            ],
+        )

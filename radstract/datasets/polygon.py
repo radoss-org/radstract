@@ -1,7 +1,6 @@
 import os
 from typing import List, Optional, Tuple, Union
 
-from h11 import Data
 from PIL import Image
 
 from radstract.data.dicom import DicomTypes
