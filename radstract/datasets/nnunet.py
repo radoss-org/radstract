@@ -33,12 +33,14 @@ def nnunet_decide_split(
     # get the last part of the image_dir
     split_dir = image_dir.split("/")[-1]
 
-    if split_dir == "val":
-        raise ValueError("nnUNet does not have validation data")
+    if split_dir == "test":
+        raise ValueError(
+            "nnUNet does not have test data - please seperate these manually."
+        )
 
     mapping = {
         "train": "imagesTr",
-        "test": "imagesTs",
+        "val": "imagesTs",
     }
 
     split_dir = mapping[split_dir]
