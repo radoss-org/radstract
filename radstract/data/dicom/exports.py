@@ -11,10 +11,13 @@ Examples: https://github.com/radoss-org/Radstract/tree/main/examples/data/dicom_
 import random
 import warnings
 from io import BytesIO
+from typing import List
 
 import numpy as np
 import pydicom
+from PIL import Image
 from pydicom.dataset import FileMetaDataset
+from pydicom.uid import JPEG2000
 
 from radstract.data.dicom.utils import DicomTypes
 
@@ -222,9 +225,10 @@ def add_tags(
 
 
 def convert_images_to_dicom(
-    images: pydicom.Dataset,
+    images: List[Image.Image],
     empty_dicom: pydicom.Dataset = None,
     old_dicom: pydicom.Dataset = None,
+    compress_ratio: int = 1,
 ) -> pydicom.Dataset:
     """
     Converts a list of images to a DICOM dataset, transferring specified tags.
@@ -232,11 +236,10 @@ def convert_images_to_dicom(
     :param images: List of PIL Image objects.
     :param empty_dicom: An empty DICOM with the tags to transfer to the new dataset.
     :param old_dicom: pydicom Dataset object.
+    :param compress_ratio: Optional scalar for resizing.
 
     :return: New DICOM dataset with specified tags transferred, and image
     """
-
-    multi_frame_array = np.stack(images, axis=0)
 
     if empty_dicom is None:
         empty_dicom = create_empty_dicom(
@@ -248,16 +251,22 @@ def convert_images_to_dicom(
     else:
         new_dicom = empty_dicom
 
-    new_dicom.PixelData = multi_frame_array.tobytes()
+    data = np.stack(images, axis=0)
 
-    new_dicom.NumberOfFrames = len(images)
-    new_dicom.Rows, new_dicom.Columns = (
-        multi_frame_array.shape[1],
-        multi_frame_array.shape[2],
+    empty_dicom.set_pixel_data(
+        data, photometric_interpretation="RGB", bits_stored=8
     )
 
-    new_dicom.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
-    new_dicom.PlanarConfiguration = 0
+    if compress_ratio > 1:
+        empty_dicom.compress(JPEG2000, j2k_quality=compress_ratio)
+
+    empty_dicom.file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
+    empty_dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
+
+    # validate
+    pydicom.dataset.validate_file_meta(
+        empty_dicom.file_meta, enforce_standard=True
+    )
 
     # forces write_like_original=False
     with BytesIO() as output:

@@ -4,13 +4,11 @@ Handles the conversion of DICOM datasets to images.
 Example: https://github.com/radoss-org/Radstract/tree/main/examples/data/dicom_import.py
 """
 
-import warnings
 from typing import List, Tuple
 
 import pydicom
 from PIL import Image
 
-from radstract.data.colors import get_unique_colours
 from radstract.data.dicom.utils import DicomTypes
 from radstract.data.images import (
     NoiseReductionFilter,
@@ -24,59 +22,6 @@ class PhotometricInterpretation:
     YBR_FULL = "YBR_FULL"
     RGB = "RGB"
     MONOCHROME2 = "MONOCHROME2"
-
-
-def convert_dicom_img_to_rgb(
-    image: Image.Image, photometric_interpretation: PhotometricInterpretation
-):
-    """
-    Convert an image from any color space to RGB using NumPy.
-
-    :param image: NumPy array representing an image.
-    :param photometric_interpretation: The photometric interpretation of the image.
-
-    :return: NumPy array representing the image in RGB color space.
-
-    :raises NotImplementedError: If the photometric interpretation is not supported.
-    """
-
-    if photometric_interpretation == PhotometricInterpretation.RGB:
-        rgb = Image.fromarray(image, mode="RGB")
-
-        # This means that the image has been processed wrong,
-        # and we should try to convert it to YCbCr and then to RGB
-        if len(get_unique_colours(rgb)) == 0:
-            # Log a warning
-            warnings.warn(
-                "Image is in RGB but has no unique colours. "
-                "Attempting known fix..."
-            )
-            image = Image.fromarray(image, mode="YCbCr")
-            rgb = image.convert("RGB")
-
-    elif photometric_interpretation in [
-        PhotometricInterpretation.YBR_FULL_422,
-        PhotometricInterpretation.YBR_FULL,
-    ]:
-        image = Image.fromarray(image, mode="YCbCr")
-        rgb = image.convert("RGB")
-
-    # All PhotometricInterpretations that we know can be converted automatically
-    elif photometric_interpretation in [PhotometricInterpretation.MONOCHROME2]:
-        image = Image.fromarray(image)
-        rgb = image.convert("RGB")
-
-    else:
-        # warn that the image is not in garanteed supported format, and
-        # the default conversion will be used
-        warnings.warn(
-            f"Image is in {photometric_interpretation}. "
-            "Attempting default conversion to RGB..."
-        )
-        image = Image.fromarray(image)
-        rgb = image.convert("RGB")
-
-    return rgb
 
 
 def convert_dicom_to_images(
@@ -120,9 +65,7 @@ def convert_dicom_to_images(
         if not trigger:
             trigger = True
 
-        image = convert_dicom_img_to_rgb(
-            frame, old_dicom.PhotometricInterpretation
-        )
+        image = Image.fromarray(frame)
 
         image = crop_and_resize(image, crop_coordinates, compress_factor)
 

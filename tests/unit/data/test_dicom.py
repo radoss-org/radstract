@@ -2,21 +2,7 @@ import numpy as np
 import pydicom
 from PIL import Image
 
-from radstract.data.dicom import (
-    convert_dicom_img_to_rgb,
-    convert_dicom_to_images,
-)
-
-
-def test_convert_dicom_img_to_rgb(ultrasound_dcm):
-    dcm = pydicom.dcmread(ultrasound_dcm)
-    image = dcm.pixel_array[0]
-    photometric_interpretation = dcm.PhotometricInterpretation
-
-    rgb_image = convert_dicom_img_to_rgb(image, photometric_interpretation)
-
-    assert isinstance(rgb_image, Image.Image)
-    assert rgb_image.mode == "RGB"
+from radstract.data.dicom import convert_dicom_to_images
 
 
 def test_convert_dicom_to_images(ultrasound_dcm, ultrasound_label_slice0):
