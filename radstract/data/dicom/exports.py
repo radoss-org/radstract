@@ -258,7 +258,7 @@ def convert_images_to_dicom(
     )
 
     if compress_ratio > 1:
-        empty_dicom.compress(JPEG2000, j2k_quality=compress_ratio)
+        empty_dicom.compress(JPEG2000, j2k_cr=[compress_ratio])
 
     empty_dicom.file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
     empty_dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
