@@ -66,6 +66,7 @@ def convert_dicom_to_images(
             trigger = True
 
         image = Image.fromarray(frame)
+        image = image.convert("RGB")
 
         image = crop_and_resize(image, crop_coordinates, compress_factor)
 
