@@ -1,12 +1,14 @@
 ## Radstract
 
-Radstract provides a range of helper functions for working with Medical Data and analysis methods with that data.
+Radstract is python library containing shared code for RadOSS projects.
 
 It has a range of subpackages for different tasks:
 - Data: For data/image manipulation and conversion functions
 - Analysis: For different methods of analyzing the data, from nifti and dicom files
 - Math: For different mathematical functions and operations
 - Datasets: for converting and working with different datasets (Huggingface etc)
+
+Feel free to use this code in your own projects, and if you have any questions or suggestions, please feel free to open an issue.
 
 ## Installation
 

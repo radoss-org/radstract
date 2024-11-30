@@ -17,7 +17,12 @@ from radstract.analysis.shapedistro.models import (
     calculate_d2,
     generate_distribution,
 )
-from radstract.data.dicom import DicomTypes, convert_dicom_to_images
+from radstract.data import dicom
+from radstract.data.dicom import (
+    DicomTypes,
+    convert_dicom_to_images,
+    convert_images_to_dicom,
+)
 from radstract.data.images import NoiseReductionFilter, reduce_noise
 from radstract.data.models import create_model_from_nifti
 from radstract.datasets.huggingface import convert_dataset_to_huggingface
@@ -148,6 +153,36 @@ def create_shape_distro_data():
         )
 
 
+def create_dicoms_for_testing_validity_in_major_programs():
+    dcm_us, seg_file = download_case(Cases.ULTRASOUND_DICOM)
+    dcm = pydicom.dcmread(dcm_us)
+    images = convert_dicom_to_images(dcm)
+
+    # once uncompressed
+    new_dcm = convert_images_to_dicom(
+        images, itk_snap_name="Radstract-TestGen"
+    )
+
+    new_dcm_compressed = convert_images_to_dicom(
+        images, compress_ratio=15, itk_snap_name="Radstract-TestGen-Compressed"
+    )
+
+    new_dcm.save_as("./tests/test_data/ultrasound.dcm")
+    new_dcm_compressed.save_as("./tests/test_data/ultrasound_compressed.dcm")
+
+    # also test a single-image DICOM
+    single_image = images[0]
+
+    new_single_dcm = convert_images_to_dicom(
+        [single_image],
+        itk_snap_name="Radstract-TestGen-Single",
+        dicom_type=DicomTypes.SINGLE_ANONYMIZED,
+        compress_ratio=5,
+    )
+
+    new_single_dcm.save_as("./tests/test_data/ultrasound_single.dcm")
+
+
 def create_3d_model_data():
     dcm_us, seg_file = download_case(Cases.ULTRASOUND_DICOM)
 
@@ -164,3 +199,14 @@ if __name__ == "__main__":
     create_dicom_data()
     create_shape_distro_data()
     create_3d_model_data()
+    create_dicoms_for_testing_validity_in_major_programs()
+
+    # Create a print statement warning people
+    # to make sure the DICOMs open in major programs (Like ITK-SNAP)
+    print(
+        "\nWARNING\n"
+        "==================\n"
+        "Please make sure the DICOM files in tests/test_data/ultrasound.dcm "
+        ", tests/test_data/ultrasound_compressed.dcm and tests/test_data/ultrasound_single.dcm "
+        "open in major programs (Like ITK-SNAP) before committing."
+    )
