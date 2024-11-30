@@ -11,7 +11,6 @@ python = ">=3.10,<4.0"
 matplotlib = "^3.8.2"
 trimesh = "^4.0.5"
 nibabel = "^5.1.0"
-numpy = "^2.1.0"
 pillow = "^10.4.0"
 gradio = "^4.7.1"
 pydicom = "^3.0.1"
@@ -32,8 +31,11 @@ datasets = "^2.19.0"
 pdoc = "^14.4.0"
 python-gdcm = "^3.0.24.1"
 pytest-xdist = "^3.6.1"
+# https://github.com/isl-org/Open3D/pull/6874
+# Locked until open3d 0.19
 pylibjpeg = "^2.0.1"
-pylibjpeg-openjpeg = "^2.4.0"
+pylibjpeg-openjpeg = "^2.3.0"
+numpy = "^1.26.4"
 
 [[tool.poetry.source]]
 name = "PyPI"
