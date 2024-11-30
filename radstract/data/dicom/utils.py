@@ -12,12 +12,7 @@ class DicomTypes:
     SINGLE_ANONYMIZED = "SINGLE_ANONYMIZED"
     DEFAULT = SERIES
 
-    ALL_TYPES = [
-        SERIES,
-        SERIES_ANONYMIZED,
-        SINGLE,
-        DEFAULT,
-    ]
+    ALL_TYPES = [SERIES, SERIES_ANONYMIZED, SINGLE, DEFAULT, SINGLE_ANONYMIZED]
 
     ALL_SERIES = [
         SERIES,
@@ -27,4 +22,12 @@ class DicomTypes:
     ANON = [
         SERIES_ANONYMIZED,
         SINGLE_ANONYMIZED,
+    ]
+
+
+class Modalities:
+    ULTRASOUND = "1.2.840.10008.5.1.4.1.1.1"
+
+    ALL_MODALITIES = [
+        ULTRASOUND,
     ]

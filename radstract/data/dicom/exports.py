@@ -19,7 +19,7 @@ from PIL import Image
 from pydicom.dataset import FileMetaDataset
 from pydicom.uid import JPEG2000
 
-from radstract.data.dicom.utils import DicomTypes
+from radstract.data.dicom.utils import DicomTypes, Modalities
 
 from .utils import DicomTypes
 
@@ -30,27 +30,11 @@ class PlaceHolderTag:
     UseOldTagUID = "1.1"
 
 
-def _get_bits_data(dicom: pydicom.Dataset) -> pydicom.Dataset:
-    """
-    Sets the default bits data for a new DICOM file.
-
-    :param dicom: pydicom Dataset object.
-
-    :return: pydicom Dataset object with bits data set.
-    """
-    dicom.SamplesPerPixel = 3
-    dicom.PhotometricInterpretation = "RGB"
-    dicom.PixelRepresentation = 0
-    dicom.BitsStored = 8
-    dicom.BitsAllocated = 8
-    dicom.HighBit = 7
-
-    return dicom
-
-
 def _set_defaults(dicom: pydicom.Dataset) -> pydicom.Dataset:
     """
     Sets the default tags for a new DICOM file.
+
+    Required to get ITK-SNAP to open the file.
 
     :param dicom: pydicom Dataset object.
 
@@ -58,9 +42,6 @@ def _set_defaults(dicom: pydicom.Dataset) -> pydicom.Dataset:
     """
 
     dicom.file_meta = FileMetaDataset()
-
-    dicom.file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
-    dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
 
     dicom.file_meta.MediaStorageSOPInstanceUID = PlaceHolderTag.UseOldTagUID
     dicom.file_meta.ImplementationClassUID = pydicom.uid.generate_uid()
@@ -76,6 +57,8 @@ def _set_series(dicom: pydicom.Dataset) -> pydicom.Dataset:
     Sets the default series tags for a new DICOM file.
 
     :param dicom: pydicom Dataset object.
+
+    Required to get ITK-SNAP to open the file.
 
     :return: pydicom Dataset object with series tags set.
     """
@@ -97,6 +80,8 @@ def add_anon_tags(
 ) -> pydicom.Dataset:
     """
     Adds anonymization tags to a DICOM file.
+
+    Required to get ITK-SNAP to open the file.
 
     :param dicom: pydicom Dataset object.
     :param keyint: The key to use for anonymization.
@@ -122,13 +107,16 @@ def add_anon_tags(
 
 
 def create_empty_dicom(
-    dicom_type=DicomTypes.DEFAULT, keyint: int = None
+    dicom_type=DicomTypes.DEFAULT,
+    keyint: int = None,
+    modality: str = Modalities.ULTRASOUND,
 ) -> pydicom.Dataset:
     """
     Creates a pyDICOM Dataset with default tags for a new DICOM file.
 
     :param dicom_type: The type of DICOM file to create.
     :param keyint: The key to use for anonymization.
+    :param modality: The modality of the DICOM file.
 
     :return: pydicom Dataset object with default tags set.
 
@@ -137,11 +125,17 @@ def create_empty_dicom(
 
     if dicom_type not in DicomTypes.ALL_TYPES:
         raise NotImplementedError(
-            f"Dicom type {dicom_type} not implemented yet. Please choose from {DicomTypes.ALL_TYPES}"
+            f"Dicom type {dicom_type} not"
+            " implemented yet. Please choose from {DicomTypes.ALL_TYPES}"
+        )
+
+    if modality not in Modalities.ALL_MODALITIES:
+        raise NotImplementedError(
+            f"Modality {modality} not"
+            " implemented yet. Please choose from {Modalities.ALL_MODALITIES}"
         )
 
     new_dicom = pydicom.Dataset()
-    new_dicom = _get_bits_data(new_dicom)
     new_dicom = _set_defaults(new_dicom)
 
     if dicom_type in DicomTypes.ALL_SERIES:
@@ -229,21 +223,36 @@ def convert_images_to_dicom(
     empty_dicom: pydicom.Dataset = None,
     old_dicom: pydicom.Dataset = None,
     compress_ratio: int = 1,
+    itk_snap_name: str = None,
+    keyint: int = None,
+    modality: str = Modalities.ULTRASOUND,
+    dicom_type: DicomTypes = DicomTypes.SERIES_ANONYMIZED,
 ) -> pydicom.Dataset:
     """
     Converts a list of images to a DICOM dataset, transferring specified tags.
 
     :param images: List of PIL Image objects.
     :param empty_dicom: An empty DICOM with the tags to transfer to the new dataset.
-    :param old_dicom: pydicom Dataset object.
+    :param old_dicom: The original DICOM dataset to transfer tags from.
     :param compress_ratio: Optional scalar for resizing.
+    :param itk_snap_name: Will add name information to SeriesDescription&PatientID tag.
+    :param keyint: The key to use for anonymization.
+    :param modality: The modality of the DICOM file.
 
     :return: New DICOM dataset with specified tags transferred, and image
     """
 
+    if empty_dicom and keyint:
+        raise ValueError(
+            "Both empty_dicom and keyint are provided. "
+            "Please provide only one of them."
+        )
+
     if empty_dicom is None:
         empty_dicom = create_empty_dicom(
-            dicom_type=DicomTypes.SERIES_ANONYMIZED
+            dicom_type=dicom_type,
+            keyint=keyint,
+            modality=modality,
         )
 
     if old_dicom is not None:
@@ -251,17 +260,20 @@ def convert_images_to_dicom(
     else:
         new_dicom = empty_dicom
 
+    if modality == Modalities.ULTRASOUND:
+        new_dicom.file_meta.MediaStorageSOPClassUID = Modalities.ULTRASOUND
+        new_dicom.SOPClassUID = Modalities.ULTRASOUND
+        bits_stored = 8
+        pmi = "RGB"
+
     data = np.stack(images, axis=0)
 
     empty_dicom.set_pixel_data(
-        data, photometric_interpretation="RGB", bits_stored=8
+        data, photometric_interpretation=pmi, bits_stored=bits_stored
     )
 
     if compress_ratio > 1:
         empty_dicom.compress(JPEG2000, j2k_cr=[compress_ratio])
-
-    empty_dicom.file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
-    empty_dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
 
     # validate
     pydicom.dataset.validate_file_meta(
@@ -270,8 +282,12 @@ def convert_images_to_dicom(
 
     # forces write_like_original=False
     with BytesIO() as output:
-        new_dicom.save_as(output, write_like_original=False)
+        new_dicom.save_as(output, enforce_file_format=True)
         output.seek(0)
         new_dicom = pydicom.dcmread(output)
+
+    if itk_snap_name:
+        new_dicom.SeriesDescription = itk_snap_name
+        new_dicom.PatientID = itk_snap_name
 
     return new_dicom
