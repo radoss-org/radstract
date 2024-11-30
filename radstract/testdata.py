@@ -40,7 +40,7 @@ class Cases(Enum):
     ]
 
     XRAY_DCM = [
-        f"{URL}/dicoms/xray/224_DDH_10.dcm",
+        f"{URL}/dicoms/xray/331_DDH_10.dcm",
     ]
 
     ULTRAOUND_NIFTI_TEST = [
