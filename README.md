@@ -20,20 +20,7 @@ See examples here for a quickstart: https://github.com/radoss-org/Radstract/tree
 
 ## Docs
 
-The Docs currently have to be built locally, and can be done so by running the following command:
-
-```bash
-git clone https://github.com/radoss-org/radstract.git
-cd radstract
-
-# For running scripts
-pip install poethepoet
-
-poetry install
-
-# create and open docs in browser
-poe viewdocs
-```
+Docs can be viewed at https://radstract.nidusai.ca
 
 ## Examples
 

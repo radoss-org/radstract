@@ -19,11 +19,10 @@
 import logging
 
 
-class TileNumberFilter(logging.Filter):
+class _TileNumberFilter(logging.Filter):
     def filter(self, record):
         return "tile number" not in record.getMessage()
 
 
-# Replace 'your.logger.name' with the actual logger name
-logger = logging.getLogger("openjpeg.encode")
-logger.addFilter(TileNumberFilter())
+_logger = logging.getLogger("openjpeg.encode")
+_logger.addFilter(_TileNumberFilter())
