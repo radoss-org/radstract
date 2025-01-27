@@ -100,7 +100,7 @@ def convert_nifti_to_image_labels(
     if isinstance(nii, str):
         nii = nib.load(nii)
 
-    data = nii.get_fdata()
+    data = nii.get_fdata().astype(np.uint8)
     images = []
 
     for i in range(data.shape[2]):
@@ -182,7 +182,7 @@ def convert_nifti_to_images(
     if isinstance(nii, str):
         nii = nib.load(nii)
 
-    data = nii.get_fdata()
+    data = nii.get_fdata().astype(np.uint8)
     images = []
 
     for i in range(data.shape[2]):

@@ -68,17 +68,12 @@ def convert_dicom_to_images(
 
     images = []
 
-    trigger = False
     data = old_dicom.pixel_array
 
     if dicom_type == DicomTypes.SINGLE:
         data = [old_dicom.pixel_array]
 
     for frame in data:
-        # See https://github.com/pydicom/pydicom/issues/533
-        if not trigger:
-            trigger = True
-
         image = Image.fromarray(frame)
         image = image.convert("RGB")
 

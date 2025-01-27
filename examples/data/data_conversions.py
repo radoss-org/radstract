@@ -23,8 +23,10 @@ you can remove frames with no labels with a simple function.
 import pydicom
 
 from radstract.data.dicom import convert_dicom_to_images
-from radstract.data.multimodal import (convert_dicom_to_nifti,
-                                       remove_black_frames)
+from radstract.data.multimodal import (
+    convert_dicom_to_nifti,
+    remove_black_frames,
+)
 from radstract.data.nifti import convert_nifti_to_image_labels
 from radstract.testdata import Cases, download_case
 

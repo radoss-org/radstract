@@ -42,7 +42,7 @@ for i, (script_path, module_dir) in enumerate(scripts):
     test_name = f'test_{script_path.split("/")[-1].replace(".py", "").replace("_", "")}'
 
     # divide i to fit into 4 groups
-    group_no = i % 4 + 1
+    group_no = i % 8 + 1
 
     def create_test(script_path, module_dir, temp_dir):
         @pytest.mark.xdist_group(name=f"group{group_no}")
@@ -56,7 +56,11 @@ for i, (script_path, module_dir) in enumerate(scripts):
                 env["PYTHONPATH"] = module_dir
 
                 # Run the script
-                subprocess.run(["python", script_path], check=True, env=env)
+                subprocess.run(
+                    ["poetry", "run", "python", script_path],
+                    check=True,
+                    env=env,
+                )
 
                 # Capture the state of the directory after the script runs
                 final_files = set(os.listdir(temp_dir))
