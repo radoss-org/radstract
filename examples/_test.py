@@ -57,7 +57,7 @@ for i, (script_path, module_dir) in enumerate(scripts):
 
                 # Run the script
                 subprocess.run(
-                    ["poetry", "run", "python", script_path],
+                    ["python", script_path],
                     check=True,
                     env=env,
                 )

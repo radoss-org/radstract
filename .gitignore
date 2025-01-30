@@ -16,3 +16,4 @@ __pycache__
 
 # tests
 /tests/test_data
+.venv
