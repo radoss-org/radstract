@@ -55,9 +55,7 @@ def convert_dataset_to_huggingface(
     for split in ["images", "labels"]:
         os.makedirs(os.path.join(output_dir, split), exist_ok=True)
         for split_dir in ["train", "val", "test"]:
-            os.makedirs(
-                os.path.join(output_dir, split, split_dir), exist_ok=True
-            )
+            os.makedirs(os.path.join(output_dir, split, split_dir), exist_ok=True)
 
     # Convert the dataset to a Huggingface DatasetDict
     convert_dcm_nii_dataset(
@@ -113,9 +111,7 @@ def make_huggingface_datadict(
 
     # step 1: create Dataset objects
     train_dataset = create_dataset(image_paths_train, label_paths_train)
-    validation_dataset = create_dataset(
-        image_paths_validation, label_paths_validation
-    )
+    validation_dataset = create_dataset(image_paths_validation, label_paths_validation)
 
     # step 2: create DatasetDict
     dataset = DatasetDict(

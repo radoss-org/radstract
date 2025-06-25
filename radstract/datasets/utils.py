@@ -73,9 +73,7 @@ def _process_dicom_nifti_pair(
         nii_path, crop_coordinates=crop_coordinates
     )
 
-    dicom_images, nifti_images = remove_black_frames(
-        dicom_images, nifti_images
-    )
+    dicom_images, nifti_images = remove_black_frames(dicom_images, nifti_images)
 
     new_nifti_images = []
 
@@ -225,9 +223,7 @@ def convert_dcm_nii_dataset(
             elif file.endswith(".nii.gz"):
                 file_pairs[key]["nii"] = file
 
-    pairs_to_process = [
-        (pair_key, pair) for pair_key, pair in file_pairs.items()
-    ]
+    pairs_to_process = [(pair_key, pair) for pair_key, pair in file_pairs.items()]
 
     # shuffle the pairs based on the seed
     rng = np.random.default_rng(datasplit_seed)

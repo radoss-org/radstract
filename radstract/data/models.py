@@ -43,9 +43,7 @@ DEFAULT_LABELS = np.array(
 )
 
 
-def create_model_from_nifti(
-    nii_file: Union[str, Nifti1Image]
-) -> trimesh.Trimesh:
+def create_model_from_nifti(nii_file: Union[str, Nifti1Image]) -> trimesh.Trimesh:
     """
     Create a model from a nii file.
 
@@ -73,9 +71,7 @@ def create_model_from_nifti(
 
     vertex_colors = get_vertex_colours(verts, values)
 
-    mesh = trimesh.Trimesh(
-        vertices=verts, faces=faces, vertex_colors=vertex_colors
-    )
+    mesh = trimesh.Trimesh(vertices=verts, faces=faces, vertex_colors=vertex_colors)
 
     # Smooth the mesh
     smoothed = filter_humphrey(mesh, iterations=10, alpha=0.2, beta=0.6)

@@ -26,7 +26,7 @@ from radstract.analysis.shapedistro import (
 )
 from radstract.testdata import Cases, download_case
 
-*_, dcm1, dcm2, dcm3, dcm4 = download_case(Cases.ULTRASOUND_DICOM_DATASET)
+*_, dcm1, dcm2, dcm3 = download_case(Cases.ULTRASOUND_DICOM_DATASET)
 
 SAVEDIR = "debug"
 
@@ -46,7 +46,6 @@ data = {
     ],
     "Group 2": [
         dcm3,
-        dcm4,
     ],
 }
 

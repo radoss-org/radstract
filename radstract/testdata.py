@@ -22,9 +22,7 @@ from enum import Enum
 
 import requests
 
-URL = (
-    "https://raw.githubusercontent.com/radoss-org/radoss-creative-commons/main"
-)
+URL = "https://raw.githubusercontent.com/radoss-org/radoss-creative-commons/main"
 
 
 class Cases(Enum):
@@ -46,11 +44,9 @@ class Cases(Enum):
         f"{URL}/dicoms/ultrasound/171551.dcm",
         f"{URL}/dicoms/ultrasound/172534.dcm",
         f"{URL}/dicoms/ultrasound/172536.dcm",
-        f"{URL}/dicoms/ultrasound/172534.dcm",
         f"{URL}/labels/ultrasound/171551.nii.gz",
         f"{URL}/labels/ultrasound/172534.nii.gz",
         f"{URL}/labels/ultrasound/172536.nii.gz",
-        f"{URL}/labels/ultrasound/172534.nii.gz",
     ]
 
     XRAY_DCM = [
@@ -67,10 +63,14 @@ class Cases(Enum):
         f"{URL}/other/ultrasound/172535-images.nii.gz",
     ]
 
+    ULTRASOUND_REPORT_TEST = [
+        f"{URL}/other/ultrasound/172535.mp4",
+        f"{URL}/other/ultrasound/172535_0.png",
+        "https://avatars.githubusercontent.com/u/167651866?s=400&u=c8a5acfe71d886fc8d3ed2f11fa6997fd673fefd&v=4.jpg",
+    ]
 
-def download_case(
-    case: Cases, directory: str = None, temp=True, silent=True
-) -> list:
+
+def download_case(case: Cases, directory: str = None, temp=True, silent=True) -> list:
     """
     Download the test data for the given case
 
@@ -115,9 +115,7 @@ def download_case(
             if not silent:
                 print(f"Downloaded {filename}")
         else:
-            print(
-                f"Failed to download {url}, status code: {response.status_code}"
-            )
+            print(f"Failed to download {url}, status code: {response.status_code}")
 
         filenames.append(filename)
 

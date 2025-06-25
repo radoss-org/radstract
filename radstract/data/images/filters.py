@@ -110,8 +110,6 @@ def reduce_noise(
             warnings.warn(f"Unknown filter type: {fil_func.type}")
 
     # Convert back to Pillow format
-    processed_image = Image.fromarray(
-        cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
-    )
+    processed_image = Image.fromarray(cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB))
 
     return processed_image

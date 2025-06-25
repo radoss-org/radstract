@@ -210,9 +210,9 @@ def convert_labels_to_image(slice_data: np.ndarray) -> np.ndarray:
 
     for mask in np.sort(np.unique(slice_data)):
         if mask != 0:
-            color_mapped_data[
-                slice_data == mask
-            ] = LabelColours.get_color_from_index(int(mask))
+            color_mapped_data[slice_data == mask] = LabelColours.get_color_from_index(
+                int(mask)
+            )
 
     return color_mapped_data
 

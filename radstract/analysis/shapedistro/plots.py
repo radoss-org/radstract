@@ -89,9 +89,7 @@ def calculate_average(
     # adjust bin centers accordingly
     trim_length = len(average_bin_centers) - len(average_hist_rolled)
     start_index = int(trim_length / 2)
-    end_index = -int(
-        (trim_length + 1) / 2
-    )  # Adjustment made here to correctly trim
+    end_index = -int((trim_length + 1) / 2)  # Adjustment made here to correctly trim
     trimmed_average_bin_centers = average_bin_centers[start_index:end_index]
 
     return np.array(trimmed_average_bin_centers), np.array(average_hist_rolled)

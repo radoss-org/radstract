@@ -53,9 +53,7 @@ def remove_black_frames(
     """
 
     if len(dicom_list) != len(nifti_label_list):
-        warnings.warn(
-            "DICOM and NIFTI lists are of different lengths. Check the data."
-        )
+        warnings.warn("DICOM and NIFTI lists are of different lengths. Check the data.")
         return dicom_list, nifti_label_list
 
     # Create copies to avoid modifying original lists
@@ -82,9 +80,7 @@ def convert_dicom_to_nifti(
     crop_coordinates: Optional[Tuple[int, int, int, int]] = None,
     compress_factor: Optional[int] = 1,
     dicom_type: Optional[DicomTypes] = DicomTypes.DEFAULT,
-    noise_filters: Optional[
-        NoiseReductionFilter
-    ] = NoiseReductionFilter.DEFAULT,
+    noise_filters: Optional[NoiseReductionFilter] = NoiseReductionFilter.DEFAULT,
 ) -> NIFTI:
     """
     Convert a DICOM file to NIfTI format using SimpleITK.

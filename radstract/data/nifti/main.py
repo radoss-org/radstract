@@ -67,9 +67,7 @@ class NIFTI:
         :raises ValueError: If the NIfTI type is unknown.
         """
         if self.type == NIFTI_Types.SITK:
-            sitk.WriteImage(
-                self.image, out_path, useCompression=useCompression
-            )
+            sitk.WriteImage(self.image, out_path, useCompression=useCompression)
         elif self.type == NIFTI_Types.NIBABEL:
             nib.save(self.image, out_path)
 
@@ -113,9 +111,7 @@ def convert_nifti_to_image_labels(
         img = Image.fromarray((color_mapped_slice).astype("uint8"), "RGB")
 
         # Apply crop and resize
-        img = crop_and_resize(
-            img, crop_coordinates, compress_factor, for_label=True
-        )
+        img = crop_and_resize(img, crop_coordinates, compress_factor, for_label=True)
 
         images.append(img)
 
@@ -195,9 +191,7 @@ def convert_nifti_to_images(
         img = Image.fromarray((slice_data).astype("uint8"), "RGB")
 
         # Apply crop and resize
-        img = crop_and_resize(
-            img, crop_coordinates, compress_factor, for_label=True
-        )
+        img = crop_and_resize(img, crop_coordinates, compress_factor, for_label=True)
 
         images.append(img)
 
