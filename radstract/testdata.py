@@ -46,11 +46,9 @@ class Cases(Enum):
         f"{URL}/dicoms/ultrasound/171551.dcm",
         f"{URL}/dicoms/ultrasound/172534.dcm",
         f"{URL}/dicoms/ultrasound/172536.dcm",
-        f"{URL}/dicoms/ultrasound/172534.dcm",
         f"{URL}/labels/ultrasound/171551.nii.gz",
         f"{URL}/labels/ultrasound/172534.nii.gz",
         f"{URL}/labels/ultrasound/172536.nii.gz",
-        f"{URL}/labels/ultrasound/172534.nii.gz",
     ]
 
     XRAY_DCM = [
@@ -65,6 +63,12 @@ class Cases(Enum):
     ULTRASOUND_DICOM_NIFTI_TEST = [
         f"{URL}/dicoms/ultrasound/172535.dcm",
         f"{URL}/other/ultrasound/172535-images.nii.gz",
+    ]
+
+    ULTRASOUND_REPORT_TEST = [
+        f"{URL}/other/ultrasound/172535.mp4",
+        f"{URL}/other/ultrasound/172535_0.png",
+        "https://avatars.githubusercontent.com/u/167651866?s=400&u=c8a5acfe71d886fc8d3ed2f11fa6997fd673fefd&v=4.jpg",
     ]
 
 
