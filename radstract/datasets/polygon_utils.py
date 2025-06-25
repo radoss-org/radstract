@@ -85,9 +85,7 @@ def get_polygon_annotations(
         for colour_key in polygons.keys():
             for polygon in polygons[colour_key]:
                 # Normalize the polygon coordinates (0 to 1 scale) based on the image dimensions
-                normalized_polygon = [
-                    (x / width, y / height) for x, y in polygon
-                ]
+                normalized_polygon = [(x / width, y / height) for x, y in polygon]
 
                 line = f"{colour_key} " + " ".join(
                     f"{x:.6f} {y:.6f}" for x, y in normalized_polygon

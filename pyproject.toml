@@ -91,3 +91,4 @@ help_real.shell = """
     echo
 """
 help = "poe -q help_real"
+format = "poetry run black radstract"

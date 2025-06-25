@@ -20,6 +20,12 @@ from typing import Dict, List, Optional, Union
 
 from weasyprint import HTML, Attachment
 
+from .report_utils import (
+    create_attachment_info,
+    create_highlight_box,
+    generate_css_styles,
+)
+
 
 class ReportGenerator:
     """
@@ -79,8 +85,14 @@ class ReportGenerator:
         self.logo_path = logo_path
         self.content_sections = []
         self._attachments = []
-
         self.first_subtitle_made = False
+
+    def _add_content_section(
+        self, section_type: str, content: str
+    ) -> "ReportGenerator":
+        """Helper method to add content sections."""
+        self.content_sections.append({"type": section_type, "content": content})
+        return self
 
     def add_subtitle(self, text: str, level: int = 2) -> "ReportGenerator":
         """
@@ -89,21 +101,15 @@ class ReportGenerator:
         :param text: Text of the subtitle
         :param level: Level of the subtitle (1-6)
         """
-
-        if not self.first_subtitle_made:
-            margin_top = "0px"
-            self.first_subtitle_made = True
-        else:
-            margin_top = "15px"
+        margin_top = "0px" if not self.first_subtitle_made else "15px"
+        self.first_subtitle_made = True
 
         tag = f"h{min(max(level, 1), 6)}"
-        self.content_sections.append(
-            {
-                "type": "subtitle",
-                "content": f'<{tag} style="color: {self.accent_color}; font-family: Arial Black, Arial, sans-serif; font-size: {20 - (level-2)*2}px; margin: {margin_top} 0 10px 0; border-bottom: 2px solid {self.accent_color}; padding-bottom: 5px;">{text}</{tag}>',
-            }
-        )
-        return self
+        font_size = 20 - (level - 2) * 2
+
+        content = f'<{tag} style="color: {self.accent_color}; font-family: Arial Black, Arial, sans-serif; font-size: {font_size}px; margin: {margin_top} 0 10px 0; border-bottom: 2px solid {self.accent_color}; padding-bottom: 5px;">{text}</{tag}>'
+
+        return self._add_content_section("subtitle", content)
 
     def add_paragraph(self, text: str) -> "ReportGenerator":
         """
@@ -111,13 +117,8 @@ class ReportGenerator:
 
         :param text: Text of the paragraph
         """
-        self.content_sections.append(
-            {
-                "type": "paragraph",
-                "content": f'<p style="color: {self.text_color}; font-family: Arial, sans-serif; margin: 10px 0; line-height: 1.4;">{text}</p>',
-            }
-        )
-        return self
+        content = f'<p style="color: {self.text_color}; font-family: Arial, sans-serif; margin: 10px 0; line-height: 1.4;">{text}</p>'
+        return self._add_content_section("paragraph", content)
 
     def add_table(
         self, data: List[List[str]], headers: Optional[List[str]] = None
@@ -132,30 +133,24 @@ class ReportGenerator:
 
         # Add headers if provided
         if headers:
-            table_html += "<thead>"
-            table_html += "<tr>"
+            table_html += "<thead><tr>"
             for header in headers:
                 table_html += f'<th style="background-color: {self.accent_color}; color: black; padding: 10px; text-align: center; font-weight: bold; border: 1px solid {self.border_color};">{header}</th>'
-            table_html += "</tr>"
-            table_html += "</thead>"
+            table_html += "</tr></thead>"
 
         # Add data rows
         table_html += "<tbody>"
         for i, row in enumerate(data):
             bg_color = (
-                self.background_color_light
-                if i % 2 == 0
-                else self.background_color
+                self.background_color_light if i % 2 == 0 else self.background_color
             )
             table_html += "<tr>"
             for cell in row:
                 table_html += f'<td style="padding: 8px; text-align: center; border: 1px solid {self.border_color}; background-color: {bg_color}; color: {self.text_color};">{cell}</td>'
             table_html += "</tr>"
-        table_html += "</tbody>"
-        table_html += "</table>"
+        table_html += "</tbody></table>"
 
-        self.content_sections.append({"type": "table", "content": table_html})
-        return self
+        return self._add_content_section("table", table_html)
 
     def add_highlights(
         self,
@@ -176,11 +171,7 @@ class ReportGenerator:
         """
         # Create highlights container
         highlights_html = f'<div style="background-color: {self.background_color_light}; border-radius: 8px; padding: 12px; margin: 20px 0; border: 1px solid {self.border_color};">'
-
-        # Add highlights title
         highlights_html += f'<h3 style="color: {self.accent_color}; font-family: Arial Black, Arial, sans-serif; font-size: 16px; margin: 3px 0 8px 0; border-bottom: 2px solid {self.accent_color}; padding-bottom: 3px;">Highlights</h3>'
-
-        # Create highlights grid in a single row with no wrap
         highlights_html += f'<div style="display: flex; flex-direction: row; gap: 8px; flex-wrap: nowrap; overflow-x: auto; justify-content: center;">'
 
         # Add success/failure indicator
@@ -188,52 +179,44 @@ class ReportGenerator:
         success_text = "Success" if report_success else "Failed"
         success_color = "#00ff00" if report_success else "#ff4444"
 
-        highlights_html += f"""
-        <div style="display: flex; align-items: center; justify-content: center; background-color: {self.background_color}; padding: 8px; border-radius: 6px; border: 1px solid {self.border_color}; min-width: 140px; flex: 1;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 8px; flex-shrink: 0; background-color: rgba({success_color}, 0.2); color: {success_color}; border: 2px solid {success_color};">
-                {success_icon}
-            </div>
-            <div style="flex: 1; min-width: 0; text-align: center;">
-                <div style="font-size: 10px; color: {self.text_color_light}; margin-bottom: 2px; white-space: nowrap;">Report Status</div>
-                <div style="font-size: 12px; font-weight: bold; color: {self.text_color}; white-space: nowrap;">{success_text}</div>
-            </div>
-        </div>
-        """
+        highlights_html += create_highlight_box(
+            success_icon,
+            success_color,
+            "Report Status",
+            success_text,
+            self.background_color,
+            self.border_color,
+            self.text_color,
+            self.text_color_light,
+        )
 
-        # Add first additional highlight if provided
+        # Add additional highlights
         if highlight1:
-            highlights_html += f"""
-            <div style="display: flex; align-items: center; justify-content: center; background-color: {self.background_color}; padding: 8px; border-radius: 6px; border: 1px solid {self.border_color}; min-width: 140px; flex: 1;">
-                <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 8px; flex-shrink: 0; background-color: rgba(0, 150, 255, 0.2); color: #0096ff; border: 2px solid #0096ff;">
-                    ℹ
-                </div>
-                <div style="flex: 1; min-width: 0; text-align: center;">
-                    <div style="font-size: 10px; color: {self.text_color_light}; margin-bottom: 2px; white-space: nowrap;">{highlight1_label}</div>
-                    <div style="font-size: 12px; font-weight: bold; color: {self.text_color}; white-space: nowrap;">{highlight1}</div>
-                </div>
-            </div>
-            """
+            highlights_html += create_highlight_box(
+                "ℹ",
+                "#0096ff",
+                highlight1_label,
+                highlight1,
+                self.background_color,
+                self.border_color,
+                self.text_color,
+                self.text_color_light,
+            )
 
-        # Add second additional highlight if provided
         if highlight2:
-            highlights_html += f"""
-            <div style="display: flex; align-items: center; justify-content: center; background-color: {self.background_color}; padding: 8px; border-radius: 6px; border: 1px solid {self.border_color}; min-width: 140px; flex: 1;">
-                <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 8px; flex-shrink: 0; background-color: rgba(0, 150, 255, 0.2); color: #0096ff; border: 2px solid #0096ff;">
-                    ℹ
-                </div>
-                <div style="flex: 1; min-width: 0; text-align: center;">
-                    <div style="font-size: 10px; color: {self.text_color_light}; margin-bottom: 2px; white-space: nowrap;">{highlight2_label}</div>
-                    <div style="font-size: 12px; font-weight: bold; color: {self.text_color}; white-space: nowrap;">{highlight2}</div>
-                </div>
-            </div>
-            """
+            highlights_html += create_highlight_box(
+                "ℹ",
+                "#0096ff",
+                highlight2_label,
+                highlight2,
+                self.background_color,
+                self.border_color,
+                self.text_color,
+                self.text_color_light,
+            )
 
         highlights_html += "</div></div>"
-
-        self.content_sections.append(
-            {"type": "highlights", "content": highlights_html}
-        )
-        return self
+        return self._add_content_section("highlights", highlights_html)
 
     def add_image(
         self,
@@ -267,18 +250,12 @@ class ReportGenerator:
 
             image_html += "</div>"
 
-            self.content_sections.append(
-                {"type": "image", "content": image_html}
-            )
+            return self._add_content_section("image", image_html)
         except Exception as e:
-            self.content_sections.append(
-                {
-                    "type": "paragraph",
-                    "content": f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>',
-                }
+            error_content = (
+                f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>'
             )
-
-        return self
+            return self._add_content_section("paragraph", error_content)
 
     def add_video(
         self, video_path: str, caption: Optional[str] = None
@@ -309,7 +286,9 @@ class ReportGenerator:
             video_html = f'<div style="text-align: center; margin: 20px 0;">'
             video_html += f'<video controls style="max-width: 50%; height: auto; border-radius: 8px; border: 4px solid {self.border_color};">'
             video_html += f'<source src="data:video/{video_type};base64,{video_base64}" type="video/{video_type}">'
-            video_html += f"Your browser does not support the video tag. Video file: {video_path}"
+            video_html += (
+                f"Your browser does not support the video tag. Video file: {video_path}"
+            )
             video_html += "</video>"
 
             if caption:
@@ -317,26 +296,19 @@ class ReportGenerator:
 
             video_html += "</div>"
 
-            self.content_sections.append(
-                {"type": "video", "content": video_html}
-            )
+            return self._add_content_section("video", video_html)
         except Exception as e:
             # Fallback to placeholder if video loading fails
-            video_html = f'<div style="text-align: center; margin: 20px 0; padding: 40px; background-color: {self.background_color}; border: 4px dashed {self.accent_color}; border-radius: 8px; max-width: 50%; margin-left: auto; margin-right: auto;">'
-            video_html += f'<p style="color: {self.accent_color}; font-size: 18px; margin: 0;">🎥 Video Content</p>'
-            video_html += f'<p style="color: {self.text_color}; font-size: 14px; margin: 10px 0 0 0;">{video_path}</p>'
-            video_html += f'<p style="color: red; font-size: 12px; margin: 5px 0 0 0;">Error loading video: {str(e)}</p>'
+            placeholder_html = f'<div style="text-align: center; margin: 20px 0; padding: 40px; background-color: {self.background_color}; border: 4px dashed {self.accent_color}; border-radius: 8px; max-width: 50%; margin-left: auto; margin-right: auto;">'
+            placeholder_html += f'<p style="color: {self.accent_color}; font-size: 18px; margin: 0;">🎥 Video Content</p>'
+            placeholder_html += f'<p style="color: {self.text_color}; font-size: 14px; margin: 10px 0 0 0;">{video_path}</p>'
+            placeholder_html += f'<p style="color: red; font-size: 12px; margin: 5px 0 0 0;">Error loading video: {str(e)}</p>'
 
             if caption:
-                video_html += f'<p style="color: {self.text_color}; font-style: italic; margin-top: 10px; font-size: 14px;">{caption}</p>'
+                placeholder_html += f'<p style="color: {self.text_color}; font-style: italic; margin-top: 10px; font-size: 14px;">{caption}</p>'
 
-            video_html += "</div>"
-
-            self.content_sections.append(
-                {"type": "video", "content": video_html}
-            )
-
-        return self
+            placeholder_html += "</div>"
+            return self._add_content_section("video", placeholder_html)
 
     def add_json(
         self, data: Union[Dict, List], title: Optional[str] = None
@@ -355,149 +327,12 @@ class ReportGenerator:
         json_html += f'<pre style="color: {self.text_color_light}; padding: 10px; font-family: monospace; font-size: 12px; margin: 0; white-space: pre-wrap; background-color: {self.background_color};">{json.dumps(data, indent=2)}</pre>'
         json_html += "</div>"
 
-        self.content_sections.append({"type": "json", "content": json_html})
-        return self
+        return self._add_content_section("json", json_html)
 
-    def generate_html(
-        self, hide_videos: bool = False, hide_attachments: bool = False
-    ) -> str:
-        """
-        Generate the complete HTML content.
+    def _create_header_html(self) -> str:
+        """Create the header HTML with logo and title."""
+        header_html = '<header><div class="header-content">'
 
-        :param hide_videos: If True, video sections will be hidden from the output
-        :param hide_attachments: If True, attachment information will be hidden from the output
-        """
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>{self.title}</title>
-            <meta charset="UTF-8">
-            <style>
-                @page {{
-                    size: A4;
-                    margin: 3.5cm 0 0 0;
-                    padding: 0;
-                    background-color: {self.page_color};
-                }}
-
-                html {{
-                    background-color: {self.page_color};
-                    height: 100%;
-                }}
-
-                body, html {{
-                    font-family: Arial, sans-serif;
-                    padding: 0;
-                    color: {self.text_color};
-                    margin: 0;
-                }}
-
-                @media screen {{
-                    header, footer {{
-                        position: static !important;
-                    }}
-
-                    .content-wrapper {{
-                        padding-top: 40px;
-                        padding-bottom: 50px;
-                    }}
-                }}
-
-                header {{
-                    position: fixed;
-                    left: 0;
-                    right: 0;
-                    top: -3.5cm;
-                    height: 2.7cm;
-                    padding: 0 50px;
-                    background-color: {self.header_color};
-                    border-bottom: 4px solid {self.accent_color};
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                }}
-
-                .header-content {{
-                    display: flex;
-                    align-items: center;
-                    gap: 15px;
-                    width: 100%;
-                    max-width: 800px;
-                    margin: 0 auto;
-                }}
-
-                .header-logo {{
-                    height: 40px;
-                    width: auto;
-                    flex-shrink: 0;
-                }}
-
-                header h1 {{
-                    color: {self.accent_color};
-                    margin: 0;
-                    font-size: 24px;
-                    font-family: 'Arial Black', Arial, sans-serif;
-                    text-align: left;
-                }}
-
-                footer {{
-                    position: fixed;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    height: 2.4cm;
-                    background-color: {self.footer_color};
-                    border-top: 4px solid {self.accent_color};
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }}
-
-                .footer-table {{
-                    width: 100%;
-                    max-width: 800px;
-                    margin: 0 auto;
-                    border-collapse: collapse; /* Important for tables */
-                }}
-
-                .footer-table td {{
-                    color: {self.text_color_light};
-                    font-size: 14px;
-                    vertical-align: middle; /* Vertically centers the content */
-                    padding: 0 50px;
-                    height: 2cm; /* Match the footer height */
-                }}
-
-                .footer-left {{
-                    text-align: left;
-                    width: 60%;
-                }}
-
-                .footer-right {{
-                    text-align: right;
-                    width: 40%;
-                }}
-
-                .content-wrapper {{
-                    max-width: 800px;
-                    margin: 0 auto;
-                    padding-right: 80px;
-                    padding-left: 80px;
-                }}
-
-                h4 {{
-                    background-color: {self.background_color_light};
-                }}
-
-            </style>
-        </head>
-        <body>
-            <header>
-                <div class="header-content">
-        """
-
-        # Add logo if provided
         if self.logo_path:
             try:
                 # Read and encode logo
@@ -510,15 +345,63 @@ class ReportGenerator:
                 if logo_type == "jpg":
                     logo_type = "jpeg"
 
-                html_content += f'<img src="data:image/{logo_type};base64,{logo_base64}" alt="Logo" class="header-logo">'
-            except Exception as e:
-                # If logo loading fails, don't add it
-                pass
+                header_html += f'<img src="data:image/{logo_type};base64,{logo_base64}" alt="Logo" class="header-logo">'
+            except Exception:
+                pass  # Skip logo if loading fails
 
-        html_content += f"""
-                    <h1>{self.title}</h1>
-                </div>
-            </header>
+        header_html += f"<h1>{self.title}</h1></div></header>"
+        return header_html
+
+    def _create_footer_html(self) -> str:
+        """Create the footer HTML with text, website, and email."""
+        footer_html = '<footer><table class="footer-table"><tr><td class="footer-left">'
+
+        if self.footer_text:
+            footer_html += self.footer_text
+
+        footer_html += '</td><td class="footer-right">'
+
+        if self.footer_website:
+            footer_html += f"<div>{self.footer_website}</div>"
+        if self.footer_email:
+            footer_html += f"<div>{self.footer_email}</div>"
+
+        footer_html += "</td></tr></table></footer>"
+        return footer_html
+
+    def generate_html(
+        self, hide_videos: bool = False, hide_attachments: bool = False
+    ) -> str:
+        """
+        Generate the complete HTML content.
+
+        :param hide_videos: If True, video sections will be hidden from the output
+        :param hide_attachments: If True, attachment information will be hidden from the output
+        """
+        css_styles = generate_css_styles(
+            self.accent_color,
+            self.header_color,
+            self.page_color,
+            self.background_color,
+            self.background_color_light,
+            self.text_color,
+            self.border_color,
+            self.text_color_light,
+            self.footer_color,
+        )
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{self.title}</title>
+            <meta charset="UTF-8">
+            <style>
+                {css_styles}
+            </style>
+        </head>
+        <body>
+            {self._create_header_html()}
             <div class="content-wrapper">
         """
 
@@ -530,68 +413,40 @@ class ReportGenerator:
 
         # Add attachment information if any attachments are present and not hidden
         if self._attachments and not hide_attachments:
-            attachment_info = f"""
-            <div style="margin: 20px 0; padding: 15px; background-color: {self.background_color_light}; border: 1px solid {self.border_color}; border-radius: 6px;">
-                <h4 style="color: {self.accent_color}; margin: 0 0 10px 0; font-family: Arial Black, Arial, sans-serif;">Attachments</h4>
-                <p style="color: {self.text_color}; font-family: Arial, sans-serif; margin: 0 0 10px 0; font-size: 14px;">
-                    This report includes {len(self._attachments)} file attachment(s). To access attachments, open this PDF in Adobe Acrobat and go to <strong>View</strong> → <strong>Show/Hide</strong> → <strong>Side panels</strong> → <strong>Attachments</strong>.
-                    For detailed instructions, visit:
-                    <a href="https://helpx.adobe.com/ca/acrobat/using/links-attachments-pdfs.html#:~:text=Save%20the%20file.-,Open%20attachments,-You%20can%20open"
-                       style="color: {self.accent_color}; text-decoration: underline;">Adobe Acrobat - Links and Attachments in PDFs</a>
-                </p>
-                <div style="margin-top: 10px;">
-            """
-
-            # Add individual attachment descriptions
-            for i, (file_path, description) in enumerate(self._attachments, 1):
-                filename = os.path.basename(file_path)
-                desc_text = (
-                    description if description else "No description provided"
-                )
-                attachment_info += f"""
-                    <div style="margin: 8px 0; padding: 8px; background-color: {self.background_color}; border-radius: 4px; border-left: 3px solid {self.accent_color};">
-                        <div style="font-weight: bold; color: {self.text_color}; font-size: 13px;">{filename}</div>
-                        <div style="color: {self.text_color_light}; font-size: 12px; margin-top: 2px;">{desc_text}</div>
-                    </div>
-                """
-
-            attachment_info += """
-                </div>
-            </div>
-            """
-            html_content += attachment_info
+            html_content += create_attachment_info(
+                self._attachments,
+                self.background_color_light,
+                self.border_color,
+                self.accent_color,
+                self.text_color,
+                self.text_color_light,
+            )
 
         html_content += """
             </div>
-            <footer>
-                <table class="footer-table">
-                    <tr>
-                        <td class="footer-left">
         """
-        # Add footer text to the left cell
-        if self.footer_text:
-            html_content += self.footer_text
-
+        html_content += self._create_footer_html()
         html_content += """
-                        </td>
-                        <td class="footer-right">
-        """
-        # Add website and email to the right cell
-        if self.footer_website:
-            html_content += f"<div>{self.footer_website}</div>"
-        if self.footer_email:
-            html_content += f"<div>{self.footer_email}</div>"
-
-        html_content += """
-                        </td>
-                    </tr>
-                </table>
-            </footer>
         </body>
         </html>
         """
 
         return html_content
+
+    def _create_attachments_list(self) -> List[Attachment]:
+        """Create list of WeasyPrint Attachment objects."""
+        attachments = []
+        for file_path, description in self._attachments:
+            with open(file_path, "rb") as f:
+                file_obj = io.BytesIO(f.read())
+            attachments.append(
+                Attachment(
+                    name=os.path.basename(file_path),
+                    file_obj=file_obj,
+                    description=description,
+                )
+            )
+        return attachments
 
     def save_pdf(self, output_path: str, hide_videos=True) -> bool:
         """
@@ -601,31 +456,16 @@ class ReportGenerator:
         """
         try:
             html_content = self.generate_html(hide_videos=hide_videos)
-
-            # Create HTML object from string
             html_doc = HTML(string=html_content)
 
-            # Write PDF to file with attachments if any
             if self._attachments:
-                attachments = []
-
-                for attachment in self._attachments:
-                    with open(attachment[0], "rb") as f:
-                        file_obj = io.BytesIO(f.read())
-                    attachments.append(
-                        Attachment(
-                            name=os.path.basename(attachment[0]),
-                            file_obj=file_obj,
-                            description=attachment[1],
-                        )
-                    )
-
-                html_doc.write_pdf(output_path, attachments=attachments)
+                html_doc.write_pdf(
+                    output_path, attachments=self._create_attachments_list()
+                )
             else:
                 html_doc.write_pdf(output_path)
 
             return True
-
         except Exception as e:
             print(f"Error generating PDF: {str(e)}")
             return False
@@ -636,9 +476,13 @@ class ReportGenerator:
 
         :param output_path: Path where to save the HTML file
         """
-        with open(output_path, "w") as f:
-            f.write(self.generate_html(hide_attachments=hide_attachments))
-        return True
+        try:
+            with open(output_path, "w") as f:
+                f.write(self.generate_html(hide_attachments=hide_attachments))
+            return True
+        except Exception as e:
+            print(f"Error saving HTML: {str(e)}")
+            return False
 
     def get_pdf_bytes(self, hide_videos=True) -> Optional[bytes]:
         """
@@ -648,31 +492,16 @@ class ReportGenerator:
         """
         try:
             html_content = self.generate_html(hide_videos=hide_videos)
-
-            # Create HTML object from string
             html_doc = HTML(string=html_content)
 
-            # Write PDF to bytes with attachments if any
             if self._attachments:
-                attachments = []
-
-                for attachment in self._attachments:
-                    with open(attachment[0], "rb") as f:
-                        file_obj = io.BytesIO(f.read())
-                    attachments.append(
-                        Attachment(
-                            name=os.path.basename(attachment[0]),
-                            file_obj=file_obj,
-                            description=attachment[1],
-                        )
-                    )
-
-                pdf_bytes = html_doc.write_pdf(attachments=attachments)
+                pdf_bytes = html_doc.write_pdf(
+                    attachments=self._create_attachments_list()
+                )
             else:
                 pdf_bytes = html_doc.write_pdf()
 
             return pdf_bytes
-
         except Exception as e:
             print(f"Error generating PDF bytes: {str(e)}")
             return None
@@ -694,7 +523,6 @@ class ReportGenerator:
         :return: Self for method chaining
         """
         self._attachments.append((file_path, description))
-
         return self
 
     def clear_attachments(self) -> "ReportGenerator":

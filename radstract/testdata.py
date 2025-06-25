@@ -22,9 +22,7 @@ from enum import Enum
 
 import requests
 
-URL = (
-    "https://raw.githubusercontent.com/radoss-org/radoss-creative-commons/main"
-)
+URL = "https://raw.githubusercontent.com/radoss-org/radoss-creative-commons/main"
 
 
 class Cases(Enum):
@@ -72,9 +70,7 @@ class Cases(Enum):
     ]
 
 
-def download_case(
-    case: Cases, directory: str = None, temp=True, silent=True
-) -> list:
+def download_case(case: Cases, directory: str = None, temp=True, silent=True) -> list:
     """
     Download the test data for the given case
 
@@ -119,9 +115,7 @@ def download_case(
             if not silent:
                 print(f"Downloaded {filename}")
         else:
-            print(
-                f"Failed to download {url}, status code: {response.status_code}"
-            )
+            print(f"Failed to download {url}, status code: {response.status_code}")
 
         filenames.append(filename)
 

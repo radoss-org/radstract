@@ -76,9 +76,7 @@ def save_nunnet(
     # remove everything from dir after images/
     root_output_dir = image_dir.split("images/")[0]
 
-    nii_dir, nii_label_dir = nnunet_decide_split(
-        root_output_dir, image_dir, label_dir
-    )
+    nii_dir, nii_label_dir = nnunet_decide_split(root_output_dir, image_dir, label_dir)
 
     nifti_image = NIFTI(sitk.GetImageFromArray(np.array(images)))
     nifti_label = convert_images_to_nifti_labels(image_labels)
