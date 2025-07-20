@@ -18,17 +18,25 @@ Radstract supportd creating DICOM files from images.
 This is an experimental feature, and is not recommended for production use.
 """
 
+import json
+
 from PIL import Image
 
-from radstract.data.dicom import convert_images_to_dicom
+from radstract.data.dicom import convert_images_to_dicom, ohif_validator
 
 # create random noise image
 image = Image.new("RGB", (512, 512))
+# create a red circle
+image.paste((255, 255, 255), (100, 100, 200, 200))
 
 images = [image, image]
 
 # convert images to dicom
 dcm = convert_images_to_dicom(images)
+
+# validate dicom
+passed, results = ohif_validator(dcm)
+assert passed, json.dumps(results, indent=2)
 
 # save dicom
 dcm.save_as("debug/dicom_creation.dcm")

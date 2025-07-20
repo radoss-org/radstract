@@ -22,10 +22,12 @@ Examples: https://github.com/radoss-org/Radstract/tree/main/examples/data/dicom_
 
 """
 
+import os
 import random
+import types
 import warnings
 from io import BytesIO
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pydicom
@@ -89,11 +91,11 @@ def _set_series(dicom: pydicom.Dataset) -> pydicom.Dataset:
     return dicom
 
 
-def add_anon_tags(dicom: pydicom.Dataset, keyint: int = None) -> pydicom.Dataset:
+def add_anon_tags(
+    dicom: pydicom.Dataset, keyint: Optional[int] = None
+) -> pydicom.Dataset:
     """
     Adds anonymization tags to a DICOM file.
-
-    Required to get ITK-SNAP to open the file.
 
     :param dicom: pydicom Dataset object.
     :param keyint: The key to use for anonymization.
@@ -111,16 +113,42 @@ def add_anon_tags(dicom: pydicom.Dataset, keyint: int = None) -> pydicom.Dataset
     dicom.StudyInstanceUID = pydicom.uid.generate_uid()
 
     dicom.SeriesNumber = keyint
+    dicom.InstanceNumber = keyint
 
     dicom.PatientID = key
     dicom.StudyID = key
+    dicom.SeriesDate = "20020104"
+    dicom.SeriesTime = "000000"
+    dicom.PatientName = f"Radstract {keyint}"
 
     return dicom
 
 
+def _save_as(
+    self,
+    filename: str,
+    no_change_series_desc: bool = False,
+    *args,
+    **kwargs,
+):
+    """
+    Override the default save_as function to add a custom header.
+    """
+    if not no_change_series_desc and isinstance(filename, str):
+        # remove all folder path from filename
+        self.SeriesDescription = os.path.basename(filename)
+
+    self._org_save_as(
+        filename,
+        enforce_file_format=True,
+        *args,
+        **kwargs,
+    )
+
+
 def create_empty_dicom(
     dicom_type=DicomTypes.DEFAULT,
-    keyint: int = None,
+    keyint: Optional[int] = None,
     modality: str = Modalities.ULTRASOUND,
 ) -> pydicom.Dataset:
     """
@@ -143,12 +171,17 @@ def create_empty_dicom(
 
     if modality not in Modalities.ALL_MODALITIES:
         raise NotImplementedError(
-            f"Modality {modality} not"
-            " implemented yet. Please choose from {Modalities.ALL_MODALITIES}"
+            f"Modality {modality} not implemented yet. "
+            f"Please choose from {Modalities.ALL_MODALITIES}"
         )
 
     new_dicom = pydicom.Dataset()
     new_dicom = _set_defaults(new_dicom)
+
+    if modality in Modalities.ALL_MODALITIES:
+        new_dicom.file_meta.MediaStorageSOPClassUID = modality.modality
+        new_dicom.SOPClassUID = modality.modality
+        new_dicom.Modality = modality.name
 
     if dicom_type in DicomTypes.ALL_SERIES:
         _set_series(new_dicom)
@@ -164,6 +197,10 @@ def create_empty_dicom(
             "PatientID",
             "PatientName",
             "StudyID",
+            "SeriesDescription",
+            "PatientName",
+            "PatientID",
+            "PatientSex",
         ]
         for tag in old_tags_str:
             setattr(new_dicom, tag, PlaceHolderTag.UseOldTagStr)
@@ -176,6 +213,17 @@ def create_empty_dicom(
 
         for tag in old_tags_uid:
             setattr(new_dicom, tag, PlaceHolderTag.UseOldTagUID)
+
+        old_tags_int = [
+            "SeriesNumber",
+            "InstanceNumber",
+        ]
+        for tag in old_tags_int:
+            setattr(new_dicom, tag, PlaceHolderTag.UseOldTagInt)
+
+    # override default save function
+    new_dicom._org_save_as = new_dicom.save_as
+    new_dicom.save_as = types.MethodType(_save_as, new_dicom)
 
     return new_dicom
 
@@ -201,7 +249,8 @@ def add_tags(
                 # check old element has tag
                 if not hasattr(old_element, tag):
                     warnings.warn(
-                        f"Tag {tag} not found in old DICOM dataset. " f"Skipping it."
+                        f"Tag {tag} not found in old DICOM dataset. "
+                        f"Skipping it."
                     )
                     continue
                 for sub_item_new, sub_item_old in zip(
@@ -231,11 +280,10 @@ def add_tags(
 
 def convert_images_to_dicom(
     images: List[Image.Image],
-    empty_dicom: pydicom.Dataset = None,
-    old_dicom: pydicom.Dataset = None,
+    empty_dicom: Optional[pydicom.Dataset] = None,
+    old_dicom: Optional[pydicom.Dataset] = None,
     compress_ratio: int = 1,
-    itk_snap_name: str = None,
-    keyint: int = None,
+    keyint: Optional[int] = None,
     modality: str = Modalities.ULTRASOUND,
     dicom_type: DicomTypes = DicomTypes.SERIES_ANONYMIZED,
 ) -> pydicom.Dataset:
@@ -246,7 +294,6 @@ def convert_images_to_dicom(
     :param empty_dicom: An empty DICOM with the tags to transfer to the new dataset.
     :param old_dicom: The original DICOM dataset to transfer tags from.
     :param compress_ratio: Optional scalar for resizing.
-    :param itk_snap_name: Will add name information to SeriesDescription&PatientID tag.
     :param keyint: The key to use for anonymization.
     :param modality: The modality of the DICOM file.
 
@@ -271,9 +318,13 @@ def convert_images_to_dicom(
     else:
         new_dicom = empty_dicom
 
-    if modality == Modalities.ULTRASOUND:
-        new_dicom.file_meta.MediaStorageSOPClassUID = Modalities.ULTRASOUND
-        new_dicom.SOPClassUID = Modalities.ULTRASOUND
+    if modality not in Modalities.ALL_MODALITIES:
+        raise NotImplementedError(
+            f"Modality {modality} not implemented yet. "
+            f"Please choose from {Modalities.ALL_MODALITIES}"
+        )
+
+    if modality in Modalities.ALL_MODALITIES:
         bits_stored = 8
         pmi = "RGB"
 
@@ -287,16 +338,8 @@ def convert_images_to_dicom(
         empty_dicom.compress(JPEG2000, j2k_cr=[compress_ratio])
 
     # validate
-    pydicom.dataset.validate_file_meta(empty_dicom.file_meta, enforce_standard=True)
-
-    # forces write_like_original=False
-    with BytesIO() as output:
-        new_dicom.save_as(output, enforce_file_format=True)
-        output.seek(0)
-        new_dicom = pydicom.dcmread(output)
-
-    if itk_snap_name:
-        new_dicom.SeriesDescription = itk_snap_name
-        new_dicom.PatientID = itk_snap_name
+    pydicom.dataset.validate_file_meta(
+        empty_dicom.file_meta, enforce_standard=True
+    )
 
     return new_dicom

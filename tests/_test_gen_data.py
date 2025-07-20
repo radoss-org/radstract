@@ -173,13 +173,9 @@ def create_dicoms_for_testing_validity_in_major_programs():
     images = convert_dicom_to_images(dcm)
 
     # once uncompressed
-    new_dcm = convert_images_to_dicom(
-        images, itk_snap_name="Radstract-TestGen"
-    )
+    new_dcm = convert_images_to_dicom(images)
 
-    new_dcm_compressed = convert_images_to_dicom(
-        images, compress_ratio=15, itk_snap_name="Radstract-TestGen-Compressed"
-    )
+    new_dcm_compressed = convert_images_to_dicom(images, compress_ratio=15)
 
     new_dcm.save_as("./tests/test_data/ultrasound.dcm")
     new_dcm_compressed.save_as("./tests/test_data/ultrasound_compressed.dcm")
@@ -189,7 +185,6 @@ def create_dicoms_for_testing_validity_in_major_programs():
 
     new_single_dcm = convert_images_to_dicom(
         [single_image],
-        itk_snap_name="Radstract-TestGen-Single",
         dicom_type=DicomTypes.SINGLE_ANONYMIZED,
         compress_ratio=5,
     )

@@ -39,9 +39,35 @@ class DicomTypes:
     ]
 
 
+class Modality:
+    def __init__(self, modality: str, name: str):
+        self.modality = modality
+        self.name = name
+
+    def __str__(self):
+        return self.name  # Return modality name instead of SOP Class UID
+
+    def __repr__(self):
+        return self.name  # Return modality name instead of SOP Class UID
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.name == other
+        elif isinstance(other, Modality):
+            return self.name == other.name
+        return False
+
+    def __hash__(self):
+        return hash(self.name)
+
+
 class Modalities:
-    ULTRASOUND = "1.2.840.10008.5.1.4.1.1.1"
+    ULTRASOUND = Modality("1.2.840.10008.5.1.4.1.1.1", "US")
 
     ALL_MODALITIES = [
-        ULTRASOUND,
+        ULTRASOUND.name,
+    ]
+
+    ALL_MODALITY_NAMES = [
+        ULTRASOUND.name,
     ]
