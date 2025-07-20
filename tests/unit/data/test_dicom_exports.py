@@ -69,27 +69,6 @@ def test_create_empty_dicom_series_anonymized():
     assert dicom.StudyInstanceUID is not None
 
 
-def mock_empty_dicom(dicom):
-    dicom.file_meta = FileMetaDataset()
-
-    dicom.SamplesPerPixel = 3
-    dicom.PhotometricInterpretation = "RGB"
-    dicom.PixelRepresentation = 0
-    dicom.BitsStored = 8
-    dicom.BitsAllocated = 8
-    dicom.HighBit = 7
-
-    # Ultrasound Image Storage
-    # https://dicom.nema.org/dicom/2013/output/chtml/part04/sect_i.4.html
-    dicom.SOPClassUID = "1.2.840.10008.5.1.4.1.1.6.1"
-
-    dicom.SeriesInstanceUID = pydicom.uid.generate_uid()
-    dicom.SOPInstanceUID = pydicom.uid.generate_uid()
-    dicom.StudyInstanceUID = pydicom.uid.generate_uid()
-
-    return dicom
-
-
 @pytest.mark.filterwarnings("ignore:Tag Patient's Name")
 def test_add_tags(ultrasound_dcm):
     old_dicom = pydicom.dcmread(ultrasound_dcm)
@@ -127,8 +106,7 @@ def test_add_tags(ultrasound_dcm):
 # future by remaking the example dicoms
 @pytest.mark.filterwarnings("ignore:Tag")
 def test_convert_images_to_dicom(ultrasound_label_slice0):
-    tags = pydicom.Dataset()
-    tags = mock_empty_dicom(tags)
+    tags = create_empty_dicom()
 
     test_image = Image.open(ultrasound_label_slice0).convert("RGB")
     images = [test_image]

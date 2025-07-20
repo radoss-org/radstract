@@ -23,3 +23,4 @@ https://github.com/radoss-org/Radstract/tree/main/examples/data/data_conversions
 from radstract.data.dicom.exports import *
 from radstract.data.dicom.main import *
 from radstract.data.dicom.utils import *
+from radstract.data.dicom.validator import *
