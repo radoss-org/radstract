@@ -91,7 +91,9 @@ class ReportGenerator:
         self, section_type: str, content: str
     ) -> "ReportGenerator":
         """Helper method to add content sections."""
-        self.content_sections.append({"type": section_type, "content": content})
+        self.content_sections.append(
+            {"type": section_type, "content": content}
+        )
         return self
 
     def add_subtitle(self, text: str, level: int = 2) -> "ReportGenerator":
@@ -142,7 +144,9 @@ class ReportGenerator:
         table_html += "<tbody>"
         for i, row in enumerate(data):
             bg_color = (
-                self.background_color_light if i % 2 == 0 else self.background_color
+                self.background_color_light
+                if i % 2 == 0
+                else self.background_color
             )
             table_html += "<tr>"
             for cell in row:
@@ -252,9 +256,7 @@ class ReportGenerator:
 
             return self._add_content_section("image", image_html)
         except Exception as e:
-            error_content = (
-                f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>'
-            )
+            error_content = f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>'
             return self._add_content_section("paragraph", error_content)
 
     def add_video(
@@ -286,9 +288,7 @@ class ReportGenerator:
             video_html = f'<div style="text-align: center; margin: 20px 0;">'
             video_html += f'<video controls style="max-width: 50%; height: auto; border-radius: 8px; border: 4px solid {self.border_color};">'
             video_html += f'<source src="data:video/{video_type};base64,{video_base64}" type="video/{video_type}">'
-            video_html += (
-                f"Your browser does not support the video tag. Video file: {video_path}"
-            )
+            video_html += f"Your browser does not support the video tag. Video file: {video_path}"
             video_html += "</video>"
 
             if caption:
@@ -329,6 +329,14 @@ class ReportGenerator:
 
         return self._add_content_section("json", json_html)
 
+    def add_page_break(self) -> "ReportGenerator":
+        """
+        Add a page break to the report.
+        """
+        return self._add_content_section(
+            "page_break", "<div style='page-break-after: always;'></div>"
+        )
+
     def _create_header_html(self) -> str:
         """Create the header HTML with logo and title."""
         header_html = '<header><div class="header-content">'
@@ -354,7 +362,9 @@ class ReportGenerator:
 
     def _create_footer_html(self) -> str:
         """Create the footer HTML with text, website, and email."""
-        footer_html = '<footer><table class="footer-table"><tr><td class="footer-left">'
+        footer_html = (
+            '<footer><table class="footer-table"><tr><td class="footer-left">'
+        )
 
         if self.footer_text:
             footer_html += self.footer_text

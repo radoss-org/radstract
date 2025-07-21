@@ -109,6 +109,8 @@ def main():
         description="Ultrasound examination recording - original video file",
     )
 
+    report_gen.add_page_break()
+
     report_gen.add_subtitle("Conclusions", level=2)
 
     report_gen.add_paragraph(
