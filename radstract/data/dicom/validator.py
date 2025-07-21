@@ -114,9 +114,7 @@ def ohif_validator(dcm, show_present_tags: bool = False) -> Dict:
 
     # Check for warnings (missing rendering/modality tags)
     if missing_rendering_tags:
-        messages["warnings"]["missing_rendering_tags"] = dict(
-            missing_rendering_tags
-        )
+        messages["warnings"]["missing_rendering_tags"] = dict(missing_rendering_tags)
 
     if missing_modality_specific_tags:
         messages["errors"]["missing_modality_specific_tags"] = dict(
@@ -133,9 +131,7 @@ def ohif_validator(dcm, show_present_tags: bool = False) -> Dict:
 
     # Check for UNKNOWN modality as error
     if modality == "UNKNOWN":
-        messages["errors"][
-            "unknown_modality"
-        ] = "Modality could not be determined"
+        messages["errors"]["unknown_modality"] = "Modality could not be determined"
 
     if not show_present_tags:
         del analysis["present_tags"]
@@ -235,6 +231,4 @@ def check_additional_requirements(
         and get_dicom_tag_value(dcm, "NumberOfFrames", 0) > 1
     ):
         if not hasattr(dcm, "FrameTime"):
-            warnings.append(
-                "Multi-frame image detected but FrameTime not specified"
-            )
+            warnings.append("Multi-frame image detected but FrameTime not specified")

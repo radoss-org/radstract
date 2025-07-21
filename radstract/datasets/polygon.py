@@ -55,9 +55,7 @@ def convert_dataset_to_polygons(
     for split in ["images", "labels"]:
         os.makedirs(os.path.join(output_dir, split), exist_ok=True)
         for split_dir in ["train", "val", "test"]:
-            os.makedirs(
-                os.path.join(output_dir, split, split_dir), exist_ok=True
-            )
+            os.makedirs(os.path.join(output_dir, split, split_dir), exist_ok=True)
 
     # Convert the dataset to a Huggingface DatasetDict
     convert_dcm_nii_dataset(
@@ -106,9 +104,7 @@ def save_polygons(
 
     # remove any polygons with less than 6 points
     for key, value in polygons.items():
-        polygons[key] = [
-            polygon for polygon in value if len(polygon) >= min_polygons
-        ]
+        polygons[key] = [polygon for polygon in value if len(polygon) >= min_polygons]
 
     lines = get_polygon_annotations(polygons, image_shape=dicom_image.size)
     if lines:

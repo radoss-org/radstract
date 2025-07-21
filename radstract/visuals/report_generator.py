@@ -329,6 +329,14 @@ class ReportGenerator:
 
         return self._add_content_section("json", json_html)
 
+    def add_page_break(self) -> "ReportGenerator":
+        """
+        Add a page break to the report.
+        """
+        return self._add_content_section(
+            "page_break", "<div style='page-break-after: always;'></div>"
+        )
+
     def _create_header_html(self) -> str:
         """Create the header HTML with logo and title."""
         header_html = '<header><div class="header-content">'
