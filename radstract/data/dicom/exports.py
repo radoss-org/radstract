@@ -249,8 +249,7 @@ def add_tags(
                 # check old element has tag
                 if not hasattr(old_element, tag):
                     warnings.warn(
-                        f"Tag {tag} not found in old DICOM dataset. "
-                        f"Skipping it."
+                        f"Tag {tag} not found in old DICOM dataset. " f"Skipping it."
                     )
                     continue
                 for sub_item_new, sub_item_old in zip(
@@ -338,8 +337,6 @@ def convert_images_to_dicom(
         empty_dicom.compress(JPEG2000, j2k_cr=[compress_ratio])
 
     # validate
-    pydicom.dataset.validate_file_meta(
-        empty_dicom.file_meta, enforce_standard=True
-    )
+    pydicom.dataset.validate_file_meta(empty_dicom.file_meta, enforce_standard=True)
 
     return new_dicom
