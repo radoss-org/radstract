@@ -63,11 +63,17 @@ class Modality:
 
 class Modalities:
     ULTRASOUND = Modality("1.2.840.10008.5.1.4.1.1.1", "US")
+    XRAY = Modality("1.2.840.10008.5.1.4.1.1.1.1", "DX")
+    ENCAPSULATED_PDF = Modality("1.2.840.10008.5.1.4.1.1.104.1", "DOC")
 
     ALL_MODALITIES = [
         ULTRASOUND.name,
+        XRAY.name,
+        ENCAPSULATED_PDF.name,
     ]
 
     ALL_MODALITY_NAMES = [
         ULTRASOUND.name,
+        XRAY.name,
+        ENCAPSULATED_PDF.name,
     ]

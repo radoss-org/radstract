@@ -16,10 +16,15 @@ import base64
 import io
 import json
 import os
+import random
+from datetime import datetime
 from typing import Dict, List, Optional, Union
 
+import pydicom
+from pydicom.uid import generate_uid
 from weasyprint import HTML, Attachment
 
+from ..data.dicom.utils import Modalities
 from .report_utils import (
     create_attachment_info,
     create_highlight_box,
@@ -513,6 +518,86 @@ class ReportGenerator:
         except Exception as e:
             print(f"Error generating PDF bytes: {str(e)}")
             return None
+
+    def save_to_dicom_study(
+        self,
+        output_path: str,
+        dicom_tags: pydicom.Dataset = None,
+        series_number: int = 999,
+        series_description: str = "PDF Report",
+        hide_videos: bool = True,
+    ) -> bool:
+        """
+        Save the report as a DICOM Encapsulated PDF file.
+
+        :param output_path: Path where to save the DICOM file
+        :param patient_name: Patient name for the DICOM file
+        :param patient_id: Patient ID for the DICOM file
+        :param study_description: Study description
+        :param series_description: Series description
+        :param hide_videos: If True, videos will be hidden from the PDF
+        :return: True if successful, False otherwise
+        """
+        try:
+            # Generate PDF bytes
+            pdf_bytes = self.get_pdf_bytes(hide_videos=hide_videos)
+            if not pdf_bytes:
+                return False
+
+            # Create file meta information
+            file_meta = pydicom.dataset.FileMetaDataset()
+            file_meta.MediaStorageSOPClassUID = Modalities.ENCAPSULATED_PDF.modality
+            file_meta.MediaStorageSOPInstanceUID = generate_uid()
+            file_meta.ImplementationClassUID = generate_uid()
+            file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+
+            # Create the main dataset
+            ds = pydicom.Dataset()
+            ds.file_meta = file_meta
+            ds.is_little_endian = True
+            ds.is_implicit_VR = False
+
+            important_tags_for_transfer = [
+                "StudyInstanceUID",
+                "StudyID",
+                "PatientName",
+                "PatientID",
+            ]
+
+            for tag in important_tags_for_transfer:
+                if tag in dicom_tags:
+                    setattr(ds, tag, dicom_tags[tag].value)
+
+            ds.SeriesNumber = series_number
+            ds.SeriesDescription = series_description
+
+            # SOP Common Module
+            ds.SOPClassUID = Modalities.ENCAPSULATED_PDF.modality
+            ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
+
+            # Encapsulated Document Series Module
+            ds.Modality = "DOC"
+            ds.SeriesInstanceUID = generate_uid()
+
+            # SC Equipment Module (required for encapsulated documents)
+            ds.ConversionType = "WSD"  # Workstation
+            ds.SecondaryCaptureDeviceManufacturer = "RADSTRACT"
+            ds.SecondaryCaptureDeviceManufacturerModelName = "Report Generator"
+            ds.SecondaryCaptureDeviceSoftwareVersions = "1.0"
+
+            # Encapsulated Document Module
+            ds.InstanceNumber = random.randint(1, 1000000)
+            ds.DocumentTitle = self.title
+            ds.MIMETypeOfEncapsulatedDocument = "application/pdf"
+            ds.EncapsulatedDocument = pdf_bytes
+
+            # Write the DICOM file
+            ds.save_as(output_path, write_like_original=False)
+
+            return True
+        except Exception as e:
+            print(f"Error generating DICOM: {str(e)}")
+            return False
 
     def clear(self) -> "ReportGenerator":
         """Clear all content sections and attachments."""
