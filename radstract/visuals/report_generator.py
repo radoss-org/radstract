@@ -177,7 +177,7 @@ class ReportGenerator:
         # Create highlights container
         highlights_html = f'<div style="background-color: {self.background_color_light}; border-radius: 8px; padding: 12px; margin: 20px 0; border: 1px solid {self.border_color};">'
         highlights_html += f'<h3 style="color: {self.accent_color}; font-family: Arial Black, Arial, sans-serif; font-size: 16px; margin: 3px 0 8px 0; border-bottom: 2px solid {self.accent_color}; padding-bottom: 3px;">Highlights</h3>'
-        highlights_html += f'<div style="display: flex; flex-direction: row; gap: 8px; flex-wrap: nowrap; overflow-x: auto; justify-content: center;">'
+        highlights_html += f'<div style="display: flex; flex-direction: row; gap: 8px; flex-wrap: nowrap; justify-content: center;">'
 
         # Add success/failure indicator
         success_icon = "✓" if report_success else "✗"
@@ -324,7 +324,7 @@ class ReportGenerator:
         :param data: Dictionary or list of data
         :param title: Title for the JSON block
         """
-        json_html = f'<div style="background-color: {self.background_color_light}; border: 1px solid {self.border_color}; border-radius: 6px; padding: 15px; margin: 15px 0; overflow-x: auto;">'
+        json_html = f'<div style="background-color: {self.background_color_light}; border: 1px solid {self.border_color}; border-radius: 6px; padding: 15px; margin: 15px 0;">'
 
         if title:
             json_html += f'<h4 style="color: {self.accent_color}; margin: 0 0 10px 0; font-family: Arial Black, Arial, sans-serif;">{title}</h4>'
