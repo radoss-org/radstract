@@ -15,6 +15,23 @@
 import os
 
 
+def hex_to_rgba(hex_color: str, alpha: float) -> str:
+    """Convert a hex color like '#00ff00' to an rgba() CSS string."""
+    # Remove '#' if present
+    hex_color = hex_color.lstrip("#")
+
+    # Handle short hex like #0f0
+    if len(hex_color) == 3:
+        hex_color = "".join([c * 2 for c in hex_color])
+
+    # Convert hex to RGB
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+
+    return f"rgba({r}, {g}, {b}, {alpha})"
+
+
 def generate_css_styles(
     accent_color: str,
     header_color: str,
@@ -184,7 +201,7 @@ def create_highlight_box(
     """
     return f"""
         <div style="display: flex; align-items: center; justify-content: center; background-color: {background_color}; padding: 8px; border-radius: 6px; border: 1px solid {border_color}; min-width: 140px; flex: 1;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 8px; flex-shrink: 0; background-color: rgba({icon_color}, 0.2); color: {icon_color}; border: 2px solid {icon_color};">
+            <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 8px; flex-shrink: 0; background-color: {hex_to_rgba(icon_color, 0.2)}; color: {icon_color}; border: 2px solid {icon_color};">
                 {icon}
             </div>
             <div style="flex: 1; min-width: 0; text-align: center;">
