@@ -20,7 +20,7 @@ See examples here for a quickstart: https://github.com/radoss-org/Radstract/tree
 
 ## Docs
 
-Docs can be viewed at https://radstract.nidusai.ca
+Docs can be viewed at https://radoss-org.github.io/radstract/radstract.html
 
 ## Examples
 
