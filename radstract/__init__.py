@@ -17,6 +17,20 @@
 """
 
 import logging
+import os
+
+import kaleido
+
+if not any(
+    env_var in os.environ
+    for env_var in [
+        "PYTEST_CURRENT_TEST",
+        "PYTEST",
+        "TESTING",
+        "DISABLE_KALEIDO_CHROME_SYNC",
+    ]
+):
+    kaleido.get_chrome_sync()
 
 
 class _TileNumberFilter(logging.Filter):

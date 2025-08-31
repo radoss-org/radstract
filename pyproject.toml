@@ -18,7 +18,7 @@ simpleitk = "^2.4.0"
 sympy = "^1.12"
 licensecheck = "^2023.5.2"
 plotly = "^6.1.1"
-kaleido = "0.1.0"
+kaleido = "^1.0.0"
 scikit-image = "^0.24.0"
 pytest = "^8.1.1"
 opencv-python = "^4.9.0.80"
@@ -64,6 +64,7 @@ copiedcode = [
 linecount = [{ cmd = "sudo apt install cloc" }, { cmd = "cloc ./radstract" }]
 cuda = "python -c 'import torch; print(torch.cuda.is_available())'"
 pdoc_create = "pdoc -d numpy -o docs radstract"
+chrome = "kaleido_get_chrome"
 docs = [{ cmd = "poe pdoc_create" }]
 viewdocs = [{ cmd = "poe docs" }, { cmd = "npx http-server -o ./docs" }]
 examples.shell = "mkdir -p ./debug & pytest ./examples/_test.py"
