@@ -45,7 +45,8 @@ def main():
 
     # Add highlights section with success/failure indicator and additional highlights
     report_gen.add_highlights(
-        report_success=True,
+        report_success=None,
+        status_text="Test Warning!",
         highlight1="Radstract",
         highlight1_label="Analysis Type",
         highlight2="High",

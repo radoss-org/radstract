@@ -96,7 +96,9 @@ class ReportGenerator:
         self, section_type: str, content: str
     ) -> "ReportGenerator":
         """Helper method to add content sections."""
-        self.content_sections.append({"type": section_type, "content": content})
+        self.content_sections.append(
+            {"type": section_type, "content": content}
+        )
         return self
 
     def add_subtitle(self, text: str, level: int = 2) -> "ReportGenerator":
@@ -147,7 +149,9 @@ class ReportGenerator:
         table_html += "<tbody>"
         for i, row in enumerate(data):
             bg_color = (
-                self.background_color_light if i % 2 == 0 else self.background_color
+                self.background_color_light
+                if i % 2 == 0
+                else self.background_color
             )
             table_html += "<tr>"
             for cell in row:
@@ -159,7 +163,8 @@ class ReportGenerator:
 
     def add_highlights(
         self,
-        report_success: bool = True,
+        report_success: Optional[bool] = True,
+        status_text: Optional[str] = None,
         highlight1: Optional[str] = None,
         highlight2: Optional[str] = None,
         highlight1_label: str = "Analysis Type",
@@ -168,7 +173,8 @@ class ReportGenerator:
         """
         Add a highlights section with success/failure indicator and additional highlights.
 
-        :param report_success: Whether the report generation was successful
+        :param report_success: Whether the report generation was successful (True/False/None)
+        :param status_text: Custom text to display for the status (overrides default text)
         :param highlight1: First additional highlight value
         :param highlight2: Second additional highlight value
         :param highlight1_label: Label for the first highlight
@@ -180,15 +186,28 @@ class ReportGenerator:
         highlights_html += f'<div style="display: flex; flex-direction: row; gap: 8px; flex-wrap: nowrap; justify-content: center;">'
 
         # Add success/failure indicator
-        success_icon = "✓" if report_success else "✗"
-        success_text = "Success" if report_success else "Failed"
-        success_color = "#00ff00" if report_success else "#ff4444"
+        if report_success is None:
+            success_icon = "⚠"
+            display_text = (
+                status_text if status_text is not None else "Warning"
+            )
+            success_color = "#ff8800"
+        elif report_success:
+            success_icon = "✓"
+            display_text = (
+                status_text if status_text is not None else "Success"
+            )
+            success_color = "#00ff00"
+        else:
+            success_icon = "✗"
+            display_text = status_text if status_text is not None else "Failed"
+            success_color = "#ff4444"
 
         highlights_html += create_highlight_box(
             success_icon,
             success_color,
             "Report Status",
-            success_text,
+            display_text,
             self.background_color,
             self.border_color,
             self.text_color,
@@ -257,9 +276,7 @@ class ReportGenerator:
 
             return self._add_content_section("image", image_html)
         except Exception as e:
-            error_content = (
-                f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>'
-            )
+            error_content = f'<p style="color: red;">Error loading image {image_path}: {str(e)}</p>'
             return self._add_content_section("paragraph", error_content)
 
     def add_video(
@@ -291,9 +308,7 @@ class ReportGenerator:
             video_html = f'<div style="text-align: center; margin: 20px 0;">'
             video_html += f'<video controls style="max-width: 50%; height: auto; border-radius: 8px; border: 4px solid {self.border_color};">'
             video_html += f'<source src="data:video/{video_type};base64,{video_base64}" type="video/{video_type}">'
-            video_html += (
-                f"Your browser does not support the video tag. Video file: {video_path}"
-            )
+            video_html += f"Your browser does not support the video tag. Video file: {video_path}"
             video_html += "</video>"
 
             if caption:
@@ -367,7 +382,9 @@ class ReportGenerator:
 
     def _create_footer_html(self) -> str:
         """Create the footer HTML with text, website, and email."""
-        footer_html = '<footer><table class="footer-table"><tr><td class="footer-left">'
+        footer_html = (
+            '<footer><table class="footer-table"><tr><td class="footer-left">'
+        )
 
         if self.footer_text:
             footer_html += self.footer_text
@@ -546,7 +563,9 @@ class ReportGenerator:
 
             # Create file meta information
             file_meta = pydicom.dataset.FileMetaDataset()
-            file_meta.MediaStorageSOPClassUID = Modalities.ENCAPSULATED_PDF.modality
+            file_meta.MediaStorageSOPClassUID = (
+                Modalities.ENCAPSULATED_PDF.modality
+            )
             file_meta.MediaStorageSOPInstanceUID = generate_uid()
             file_meta.ImplementationClassUID = generate_uid()
             file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
