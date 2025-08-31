@@ -40,8 +40,10 @@ def main():
 
     report_gen.add_paragraph(
         "This report contains the results of our comprehensive medical analysis. "
-        "The data has been processed and validated according to standard protocols."
+        "The data has been processed and validated according to standard protocols. https://radoss.org"
     )
+
+    report_gen.add_warning("Test Warning! https://radoss.org")
 
     # Add highlights section with success/failure indicator and additional highlights
     report_gen.add_highlights(

@@ -17,6 +17,7 @@ import io
 import json
 import os
 import random
+import re
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -118,14 +119,38 @@ class ReportGenerator:
 
         return self._add_content_section("subtitle", content)
 
+    def _make_links_clickable(self, text: str) -> str:
+        """Convert URLs in text to clickable HTML links."""
+        # Simple URL regex pattern
+        url_pattern = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
+
+        def replace_url(match):
+            url = match.group(0)
+            if url.startswith("www."):
+                url = "https://" + url
+            return f'<a href="{url}" style="color: {self.accent_color}; text-decoration: underline;" target="_blank">{match.group(0)}</a>'
+
+        return re.sub(url_pattern, replace_url, text)
+
     def add_paragraph(self, text: str) -> "ReportGenerator":
         """
         Add a paragraph of text to the report.
 
         :param text: Text of the paragraph
         """
-        content = f'<p style="color: {self.text_color}; font-family: Arial, sans-serif; margin: 10px 0; line-height: 1.4;">{text}</p>'
+        text_with_links = self._make_links_clickable(text)
+        content = f'<p style="color: {self.text_color}; font-family: Arial, sans-serif; margin: 10px 0; line-height: 1.4;">{text_with_links}</p>'
         return self._add_content_section("paragraph", content)
+
+    def add_warning(self, text: str) -> "ReportGenerator":
+        """
+        Add warning text to the report in accent color and bold.
+
+        :param text: Warning text to display
+        """
+        text_with_links = self._make_links_clickable(text)
+        content = f'<p style="color: {self.accent_color}; font-family: Arial, sans-serif; font-weight: bold; margin: 10px 0; line-height: 1.4;">⚠ {text_with_links}</p>'
+        return self._add_content_section("warning", content)
 
     def add_table(
         self, data: List[List[str]], headers: Optional[List[str]] = None
