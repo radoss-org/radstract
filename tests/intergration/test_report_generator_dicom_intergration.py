@@ -20,6 +20,7 @@ and extraction with file similarity validation.
 
 import os
 import tempfile
+import time
 
 import pydicom
 import pytest
@@ -140,6 +141,10 @@ class TestReportGeneratorDicomIntegration:
             # NOTE(sharpz7) Force file system flush on WSL - open file and fsync
             with open(extracted_pdf_path, 'rb') as f:
                 os.fsync(f.fileno())
+
+            # NOTE(sharpz7) Sleep for 0.1 seconds for GitHub Actions
+            import time
+            time.sleep(0.1)
 
             # Step 5: Load original PDF for comparison
             with open(pdf_path, "rb") as f:

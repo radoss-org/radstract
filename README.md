@@ -1,3 +1,5 @@
+![tests](https://github.com/radoss-org/retuve/actions/workflows/lint-and-test.yml/badge.svg)
+
 ## Radstract
 
 Radstract is python library containing shared code for RadOSS projects.
