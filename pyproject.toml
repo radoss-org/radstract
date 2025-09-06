@@ -31,6 +31,7 @@ pytest-xdist = "^3.6.1"
 pylibjpeg = "^2.0.1"
 pylibjpeg-openjpeg = "^2.2.1"
 weasyprint = "^65.1"
+black = "^25.1.0"
 
 [tool.poetry.group.dev.dependencies]
 deptry = "^0.16.1"
