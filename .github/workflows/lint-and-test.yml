@@ -50,10 +50,6 @@ jobs:
       run: |
         poetry run poe format --check
 
-    - name: Get all test plugins/data
-      run: |
-        poetry run poe testgetplugins
-
     - name: Generate test data
       run: |
         poetry run poe testgen
