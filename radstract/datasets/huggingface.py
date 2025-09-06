@@ -16,9 +16,6 @@ import os
 import random
 from typing import List, Tuple, Union
 
-from datasets import Dataset, DatasetDict
-from datasets import Image as HuggingfaceImage
-
 from radstract.data.dicom import DicomTypes
 
 from .utils import convert_dcm_nii_dataset, save_image_label_pair
@@ -74,7 +71,7 @@ def convert_dataset_to_huggingface(
 
 def make_huggingface_datadict(
     dataset_dir: str, dataset_fraction: int = 1.0
-) -> DatasetDict:
+) -> "DatasetDict":  # type: ignore
     """
     Create a Huggingface DatasetDict from a dataset directory.
 
@@ -83,6 +80,9 @@ def make_huggingface_datadict(
 
     :return: DatasetDict: Huggingface DatasetDict.
     """
+
+    from datasets import Dataset, DatasetDict  # type: ignore
+    from datasets import Image as HuggingfaceImage  # type: ignore
 
     def get_dataset_paths(data_type, file_type, extension):
         paths = []
