@@ -137,6 +137,10 @@ class TestReportGeneratorDicomIntegration:
             with open(extracted_pdf_path, "wb") as f:
                 f.write(pdf_data)
 
+            # NOTE(sharpz7) Force file system flush on WSL - open file and fsync
+            with open(extracted_pdf_path, 'rb') as f:
+                os.fsync(f.fileno())
+
             # Step 5: Load original PDF for comparison
             with open(pdf_path, "rb") as f:
                 original_pdf = f.read()
@@ -170,13 +174,6 @@ class TestReportGeneratorDicomIntegration:
         )
         similarity_percentage = (
             (matching_bytes / total_bytes) * 100 if total_bytes > 0 else 0
-        )
-
-        size_diff = abs(len(original_pdf) - len(extracted_pdf))
-        size_similarity = max(
-            0,
-            100
-            - (size_diff / max(len(original_pdf), len(extracted_pdf)) * 100),
         )
 
         assert similarity_percentage >= 99.99, (

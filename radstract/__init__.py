@@ -40,3 +40,6 @@ class _TileNumberFilter(logging.Filter):
 
 _logger = logging.getLogger("openjpeg.encode")
 _logger.addFilter(_TileNumberFilter())
+logging.getLogger("fontTools").setLevel(logging.WARN)
+logging.getLogger("fontTools.subset").setLevel(logging.WARN)
+logging.getLogger("fontTools.ttLib").setLevel(logging.WARN)
