@@ -1,4 +1,5 @@
-![tests](https://github.com/radoss-org/retuve/actions/workflows/lint-and-test.yml/badge.svg)
+[![Lint & Test](https://github.com/radoss-org/radstract/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/radoss-org/radstract/actions/workflows/lint-and-test.yml)
+[![codecov](https://codecov.io/gh/radoss-org/radstract/graph/badge.svg?token=AAC82LNAKU)](https://codecov.io/gh/radoss-org/radstract)
 
 ## Radstract
 
