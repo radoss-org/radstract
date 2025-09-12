@@ -17,20 +17,6 @@
 """
 
 import logging
-import os
-
-import kaleido
-
-if not any(
-    env_var in os.environ
-    for env_var in [
-        "PYTEST_CURRENT_TEST",
-        "PYTEST",
-        "TESTING",
-        "DISABLE_KALEIDO_CHROME_SYNC",
-    ]
-):
-    kaleido.get_chrome_sync()
 
 
 class _TileNumberFilter(logging.Filter):
@@ -40,6 +26,3 @@ class _TileNumberFilter(logging.Filter):
 
 _logger = logging.getLogger("openjpeg.encode")
 _logger.addFilter(_TileNumberFilter())
-logging.getLogger("fontTools").setLevel(logging.WARN)
-logging.getLogger("fontTools.subset").setLevel(logging.WARN)
-logging.getLogger("fontTools.ttLib").setLevel(logging.WARN)
