@@ -12,52 +12,33 @@ jobs:
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
 
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.5.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    - name: Add Poetry to PATH
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Create .venv directory
-      run: mkdir -p .venv
-
-    - name: Cache Poetry dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-poetry-
-          ${{ runner.os }}-
+      run: uv python install
 
     - name: Install dependencies
       run: |
-        poetry install
-        pip install poethepoet
+        uv sync --all-groups
+        uv add poethepoet
 
     - name: Check code formatting with black
       run: |
-        poetry run poe format --check
+        uv run poe format --check
 
     - name: Generate test data
       run: |
-        poetry run poe testgen
+        uv run poe testgen
 
     - name: Run tests
       run: |
         sudo rm -rf tmp/*
-        poetry run poe test_all
+        uv run poe test_all
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
