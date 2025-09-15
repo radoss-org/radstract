@@ -32,22 +32,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11"
+          version: "latest"
 
-      - name: Install Poetry
-        run: pipx install poetry
+      - name: Set up Python
+        run: uv python install
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-ansi
+        run: uv sync --all-groups
 
       - name: Build docs with pdoc
-        run: poetry run pdoc -d numpy -o docs radstract
+        run: uv run pdoc -d numpy -o docs radstract
 
       - name: Build package
-        run: poetry build
+        run: uv build
 
       - name: Include build artifacts in docs
         run: |
