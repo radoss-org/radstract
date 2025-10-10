@@ -20,11 +20,11 @@ jobs:
         version: "latest"
 
     - name: Set up Python
-      run: uv python --system install
+      run: uv python install
 
     - name: Install dependencies
       run: |
-        uv pip install .
+        uv pip install --system .
         uv add poethepoet
 
     - name: Check code formatting with black
