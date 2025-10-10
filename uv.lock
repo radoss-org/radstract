@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10, <4.0"
 resolution-markers = [
     "python_full_version >= '3.12' and sys_platform == 'darwin'",
@@ -1610,8 +1610,8 @@ requires-dist = [
     { name = "importlib-metadata", specifier = ">=7.1.0" },
     { name = "licensecheck", specifier = ">=2023.5.2" },
     { name = "matplotlib", specifier = ">=3.8.2" },
-    { name = "nibabel", specifier = "==5.2.1" },
-    { name = "numpy", specifier = "==1.26.4" },
+    { name = "nibabel", specifier = ">=5.2.1" },
+    { name = "numpy", specifier = ">=1.26.4" },
     { name = "opencv-python", specifier = ">=4.9.0.80" },
     { name = "pdoc", specifier = ">=14.4.0" },
     { name = "pillow", specifier = ">=11.0.0" },
