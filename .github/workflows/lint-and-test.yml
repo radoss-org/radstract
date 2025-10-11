@@ -9,6 +9,9 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
     - name: Check out code
@@ -19,8 +22,8 @@ jobs:
       with:
         version: "latest"
 
-    - name: Set up Python
-      run: uv python install
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
