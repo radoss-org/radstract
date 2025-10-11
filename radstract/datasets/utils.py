@@ -15,15 +15,15 @@
 import logging
 import os
 from collections import defaultdict
-from multiprocessing import Lock, Manager, Pool
+from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pydicom
 from PIL import Image
+
 from radstract.data.colors import change_color
 from radstract.data.dicom import DicomTypes, convert_dicom_to_images
-from radstract.data.multimodal import remove_black_frames
 from radstract.data.nifti import convert_nifti_to_image_labels
 
 
