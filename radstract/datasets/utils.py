@@ -14,6 +14,7 @@
 
 import logging
 import os
+import subprocess
 from collections import defaultdict
 from multiprocessing import Lock, Manager, Pool
 from typing import Dict, List, Optional, Tuple, Union
@@ -21,6 +22,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 import pydicom
 from PIL import Image
+
 from radstract.data.colors import change_color
 from radstract.data.dicom import DicomTypes, convert_dicom_to_images
 from radstract.data.multimodal import remove_black_frames
@@ -222,7 +224,9 @@ def convert_dcm_nii_dataset(
             elif file.endswith(".nii.gz"):
                 file_pairs[key]["nii"] = file
 
-    pairs_to_process = [(pair_key, pair) for pair_key, pair in file_pairs.items()]
+    pairs_to_process = [
+        (pair_key, pair) for pair_key, pair in file_pairs.items()
+    ]
 
     # shuffle the pairs based on the seed
     rng = np.random.default_rng(datasplit_seed)
@@ -266,6 +270,18 @@ def convert_dcm_nii_dataset(
         split_mapping.append(("val", pair))
     for pair in test_pairs:
         split_mapping.append(("test", pair))
+
+    # Run the tree command and capture the output
+    result = subprocess.run(
+        ["tree", "./tests/test_data/"], capture_output=True, text=True
+    )
+
+    # Print the output
+    print(result.stdout)
+
+    # Check if there was any error
+    if result.stderr:
+        print("Error:", result.stderr)
 
     # Use multiprocessing to process file pairs
     with Pool(processes=processes) as pool:
