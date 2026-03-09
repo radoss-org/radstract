@@ -49,3 +49,17 @@ def test_convert_dicom_series(ultrasound_dcm):
             images[0].size[0],
             3,
         )
+
+
+def test_convert_dicom_to_images_with_brightness_crop(ultrasound_dcm):
+    old_dicom = pydicom.dcmread(ultrasound_dcm)
+
+    images = convert_dicom_to_images(old_dicom, do_brightness_crop=True)
+
+    images[0].save("scripts/test.jpg")
+
+    import time
+
+    time.sleep(10)
+
+    assert images[0].size == (762, 753)
