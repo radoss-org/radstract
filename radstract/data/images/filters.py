@@ -80,12 +80,12 @@ def reduce_noise(
     :return: Processed Pillow image.
     """
 
+    if len(filters_compose) == 0:
+        return image
+
     # Convert Pillow image to OpenCV format
     image_cv = np.array(image)
     image_cv = cv2.cvtColor(image_cv, cv2.COLOR_RGB2BGR)
-
-    if len(filters_compose) == 0:
-        return image
 
     for fil_func in filters_compose:
         if fil_func.type == NoiseReductionFilter.MEDIAN_FILTER.type:
@@ -110,6 +110,8 @@ def reduce_noise(
             warnings.warn(f"Unknown filter type: {fil_func.type}")
 
     # Convert back to Pillow format
-    processed_image = Image.fromarray(cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB))
+    processed_image = Image.fromarray(
+        cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+    )
 
     return processed_image
