@@ -41,6 +41,9 @@ def crop_and_resize(
     :return: cropped and resized PIL image.
     """
 
+    if compress_factor == 1 and crop_coordinates is None and for_label is False:
+        return img
+
     if crop_coordinates:
         x, y, width, height = crop_coordinates
 

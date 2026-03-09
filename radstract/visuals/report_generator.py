@@ -533,14 +533,18 @@ class ReportGenerator:
             print(f"Error saving HTML: {str(e)}")
             return False
 
-    def get_pdf_bytes(self, hide_videos=True) -> Optional[bytes]:
+    def get_pdf_bytes(
+        self, hide_videos=True, hide_attachment_note=False
+    ) -> Optional[bytes]:
         """
         Get the PDF as bytes instead of saving to file.
 
         :return: PDF content as bytes, or None if failed
         """
         try:
-            html_content = self.generate_html(hide_videos=hide_videos)
+            html_content = self.generate_html(
+                hide_videos=hide_videos, hide_attachments=hide_attachment_note
+            )
             html_doc = HTML(string=html_content)
 
             if self._attachments:
@@ -562,6 +566,7 @@ class ReportGenerator:
         series_number: int = 999,
         series_description: str = "PDF Report",
         hide_videos: bool = True,
+        hide_attachment_note=False,
     ) -> bool:
         """
         Save the report as a DICOM Encapsulated PDF file.
@@ -576,7 +581,10 @@ class ReportGenerator:
         """
         try:
             # Generate PDF bytes
-            pdf_bytes = self.get_pdf_bytes(hide_videos=hide_videos)
+            pdf_bytes = self.get_pdf_bytes(
+                hide_videos=hide_videos,
+                hide_attachment_note=hide_attachment_note,
+            )
             if not pdf_bytes:
                 return False
 

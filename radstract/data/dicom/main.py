@@ -23,6 +23,9 @@ from typing import List, Tuple
 import pydicom
 from PIL import Image
 
+from radstract.data.dicom.brightness_crop import (
+    find_ultrasound_bbox_temporal_clean,
+)
 from radstract.data.dicom.utils import DicomTypes
 from radstract.data.images import (
     NoiseReductionFilter,
@@ -44,6 +47,7 @@ def convert_dicom_to_images(
     compress_factor: int = 1,
     dicom_type: str = DicomTypes.DEFAULT,
     noise_filters: List[NoiseReductionFilter] = NoiseReductionFilter.DEFAULT,
+    do_brightness_crop=False,
 ) -> Image.Image:
     """
     Converts a DICOM dataset to a new format, transferring specified tags,
@@ -72,6 +76,9 @@ def convert_dicom_to_images(
 
     if dicom_type == DicomTypes.SINGLE:
         data = [old_dicom.pixel_array]
+
+    if do_brightness_crop:
+        crop_coordinates = find_ultrasound_bbox_temporal_clean(data)
 
     for frame in data:
         image = Image.fromarray(frame)
