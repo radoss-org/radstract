@@ -165,5 +165,6 @@ class TestReportGeneratorDicomIntegration:
         assert len(extracted_pdf) > 0, "Extracted PDF should not be empty"
 
         # Check they are the same size within 100 bytes
-        assert abs(len(original_pdf) - len(extracted_pdf)) <= 10, "Files should be the same size within 100 bytes"
-
+        assert (
+            abs(len(original_pdf) - len(extracted_pdf)) <= 100
+        ), "Files should be the same size within 100 bytes"
