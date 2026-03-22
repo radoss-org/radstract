@@ -17,7 +17,6 @@ dependencies = [
     "pydicom>=3.0.1",
     "simpleitk>=2.4.0",
     "sympy>=1.12",
-    "licensecheck>=2023.5.2",
     "scikit-image>=0.24.0",
     "pytest>=8.1.1",
     "opencv-python>=4.9.0.80",
@@ -31,6 +30,7 @@ dependencies = [
     "pylibjpeg-openjpeg>=2.2.1",
     "weasyprint>=65.1",
     "black>=25.1.0",
+    "requests>=2.32.5",
 ]
 
 [dependency-groups]
@@ -51,8 +51,6 @@ filterwarnings = ["ignore::DeprecationWarning"]
 data_file = "debug/.coverage"
 
 [tool.poe.tasks]
-# Under BSD: https://www.creatis.insa-lyon.fr/software/public/Gdcm/License.html
-license = "licensecheck --ignore-packages=gdcm"
 test = "pytest -vv --cov=radstract --durations=5 ./tests/unit"
 test_intergration = "pytest -vv --cov=radstract --durations=5 ./tests/intergration"
 test_all.shell = "mkdir -p debug && pytest -vv -n 8 --cov=radstract --cov-branch --cov-report=xml --dist=loadgroup --durations=5 ./examples/_test.py ./tests "
@@ -75,7 +73,6 @@ help_real.shell = """
     echo Radstract Script Help
     echo ==================
     echo
-    echo "poe license" - Check the license of the project
     echo "poe test" - Run the unit tests
     echo "poe test_intergration" - Run the intergration tests
     echo "poe test_all" - Run all the tests, including the examples
