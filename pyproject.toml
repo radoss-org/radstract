@@ -1,6 +1,6 @@
 [project]
 name = "radstract"
-version = "1.0.1"
+version = "1.0.2"
 description = ""
 authors = [
     { name = "Sharpz7", email = "adam.mcarthur62@gmail.com" }
